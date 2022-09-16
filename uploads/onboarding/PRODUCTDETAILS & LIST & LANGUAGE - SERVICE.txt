@@ -1,0 +1,145 @@
+package NRLM.Web.Api.Admin.Service;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.NoSuchElementException;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+
+import NRLM.Web.Api.Admin.DAO.ProductMaster_DAO;
+import NRLM.Web.Api.ProducerGroup.Controller.BusinessPlan_Controller;
+
+@Service
+@Component
+@ConfigurationProperties(prefix = "file")
+public class ProductMaster_Service {
+	Logger logger = LoggerFactory.getLogger(ProductMaster_Service.class);
+	ProductMaster_DAO promstdao = new ProductMaster_DAO();
+
+	public JSONArray GetProductdtl(String productCode, String langCode, int refcursor)
+			throws ClassNotFoundException, java.sql.SQLException {
+		try {
+			ResultSet promst_rs = promstdao.GetProductdtl(productCode, langCode, refcursor);
+
+			JSONArray json = new JSONArray();
+
+			ResultSetMetaData rsmd = ((ResultSet) promst_rs).getMetaData();
+			int column_count = rsmd.getColumnCount();
+			while (((ResultSet) promst_rs).next()) {
+				int numColumns = rsmd.getColumnCount();
+				JSONObject obj = new JSONObject();
+				for (int i1 = 1; i1 <= numColumns; i1++) {
+					String column_name = rsmd.getColumnName(i1);
+					obj.put(column_name, ((ResultSet) promst_rs).getObject(column_name));
+				}
+				json.put(obj);
+			}
+
+			return json;
+		}
+
+		catch (NoSuchElementException e) {
+			logger.error(e.getMessage());
+			throw new NoSuchElementException(e.getMessage());
+		}
+
+	}
+
+	public JSONArray GetProductList(String userCode, String langCode, int refcursor)
+			throws ClassNotFoundException, java.sql.SQLException {
+		try {
+			ResultSet promst_rs = promstdao.GetProductList(userCode, langCode, refcursor);
+
+			JSONArray json = new JSONArray();
+
+			ResultSetMetaData rsmd = ((ResultSet) promst_rs).getMetaData();
+			int column_count = rsmd.getColumnCount();
+			while (((ResultSet) promst_rs).next()) {
+				int numColumns = rsmd.getColumnCount();
+				JSONObject obj = new JSONObject();
+				for (int i1 = 1; i1 <= numColumns; i1++) {
+					String column_name = rsmd.getColumnName(i1);
+					obj.put(column_name, ((ResultSet) promst_rs).getObject(column_name));
+				}
+				json.put(obj);
+			}
+
+			return json;
+		}
+
+		catch (NoSuchElementException e) {
+			logger.error(e.getMessage());
+			throw new NoSuchElementException(e.getMessage());
+		}
+
+	}
+
+	public JSONArray GetLocalLangList(String langCode, int refcursor)
+			throws ClassNotFoundException, java.sql.SQLException {
+		try {
+			ResultSet lolanglist_rs = promstdao.GetLocalLangList(langCode, refcursor);
+
+			JSONArray json = new JSONArray();
+
+			ResultSetMetaData rsmd = ((ResultSet) lolanglist_rs).getMetaData();
+			int column_count = rsmd.getColumnCount();
+			while (((ResultSet) lolanglist_rs).next()) {
+				int numColumns = rsmd.getColumnCount();
+				JSONObject obj = new JSONObject();
+				for (int i1 = 1; i1 <= numColumns; i1++) {
+					String column_name = rsmd.getColumnName(i1);
+					obj.put(column_name, ((ResultSet) lolanglist_rs).getObject(column_name));
+				}
+				json.put(obj);
+			}
+
+			return json;
+		}
+
+		catch (NoSuchElementException e) {
+			logger.error(e.getMessage());
+			throw new NoSuchElementException(e.getMessage());
+		}
+
+	}
+
+	// ****************
+
+	public JSONArray iudProdQuality(int prodqltygID, String prodCode, String prodQltyparamCode,
+			BigDecimal prodRangeFrom, BigDecimal prodRangeTo, String prodRangeFlag, String prodQltyuomCode,
+			String prodThresholdValue, String langCode, String userCode, String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+		try {
+
+		
+			ResultSet promst_rs = promstdao.iudProdQuality(prodqltygID, prodCode, prodQltyparamCode, prodRangeFrom, prodRangeTo,
+					prodRangeFlag, prodQltyuomCode, prodThresholdValue, langCode, userCode, modeFlag,succMsg);
+
+			JSONArray json = new JSONArray();
+			ResultSetMetaData rsmd = ((ResultSet) promst_rs).getMetaData();
+			int column_count = rsmd.getColumnCount();
+			while (((ResultSet) promst_rs).next()) {
+				int numColumns = rsmd.getColumnCount();
+				JSONObject obj = new JSONObject();
+				for (int i1 = 1; i1 <= numColumns; i1++) {
+					String column_name = rsmd.getColumnName(i1);
+					obj.put(column_name, ((ResultSet) promst_rs).getObject(column_name));
+				}
+				json.put(obj);
+			}
+
+			return json;
+
+		} catch (SQLException ex) {
+			throw ex;
+		}
+
+	}
+}

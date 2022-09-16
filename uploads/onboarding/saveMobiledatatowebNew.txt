@@ -1,0 +1,132 @@
+public String saveMobiledatatowebNew(String ObjJson, String langCode, String msgCode, int refCurser)
+			throws ClassNotFoundException, java.sql.SQLException {
+
+		Connection conn = commonConfiguration.connect();
+		conn.setAutoCommit(false);
+		int i = 0;
+		int a = 1;
+		ResultSet rs = null;
+
+		String SQLQuery = "";
+		String result = "";
+		try {
+		
+			JSONArray jsonarray = new JSONArray(ObjJson);
+			
+			for (i = 0; i < jsonarray.length(); i++) {
+			
+				JSONObject jsonObject = jsonarray.getJSONObject(i);
+				String tempValue = jsonObject.toString();
+				if (tempValue.contains("sync_mobile_to_web")) {
+					SQLQuery = "";
+					SQLQuery = jsonObject.getString("sync_mobile_to_web");
+					CallableStatement callableStatement_ = conn.prepareCall(SQLQuery);
+					callableStatement_.execute();
+
+				} else if (tempValue.contains("sync_attachment_mobile_to_web")) {
+					JSONObject attachment_obj = jsonObject.getJSONObject("sync_attachment_mobile_to_web");
+
+					String memberId = attachment_obj.getString("MemberID");
+					String pgId = attachment_obj.getString("PG_ID");
+					String fileType = attachment_obj.getString("FileType");
+					String fileName = attachment_obj.getString("FileName");
+					String attachmentInfo = attachment_obj.getString("AttachmentInfo");
+					if (memberId.isEmpty() || pgId.isEmpty() || fileType.isEmpty() || fileName.isEmpty()
+							|| attachmentInfo.isEmpty()) {
+
+						conn.rollback();
+						conn.close();
+					}
+					else {
+						
+						
+						String projectLocation = System.getProperty("user.dir");
+						String filePathUrl = applicationproperties.getUploadConfigPath();
+						String filePathmem = projectLocation + "/" + filePathUrl;
+						String directoryMemPro =filePathUrl;
+						String directoryNamePG = filePathmem+"/"+ attachment_obj.getString("PG_ID").toString();
+						String directoryNameMem = filePathmem+"/"+ attachment_obj.getString("PG_ID").toString() + "/"
+								+ attachment_obj.getString("MemberID").toString();
+						String filePath =  directoryNamePG;
+						File directory = new File(String.valueOf(filePath));
+						if (!directory.exists()) {
+							directory.mkdir();
+
+						}
+						filePath =  directoryMemPro;
+						directory = new File(String.valueOf(filePath));
+						if (!directory.exists()) {
+							directory.mkdir();
+
+						}
+						filePath = directoryNameMem;
+						directory = new File(String.valueOf(filePath));
+						if (!directory.exists()) {
+							directory.mkdir();
+
+						}
+						String crntImage = attachment_obj.getString("AttachmentInfo");
+						byte[] data = Base64.getMimeDecoder().decode(crntImage);
+
+						try (OutputStream stream = new FileOutputStream(
+								filePath + "/" + attachment_obj.getString("FileName").toString())) {
+							stream.write(data);
+							// update the path to table
+							String pg_Id = attachment_obj.getString("PG_ID").toString();
+							String mem_id = attachment_obj.getString("MemberID").toString();
+							//String filePathUrl = applicationproperties.getUploadConfigPath();
+							String getPath = filePathmem + "/" + attachment_obj.getString("PG_ID").toString() + "/"
+									+ attachment_obj.getString("MemberID").toString() + "/"
+									+ attachment_obj.getString("FileName").toString();
+							SQLQuery = "";
+							SQLQuery = "UPDATE pg_mst_tpgmemberattachment " + " SET file_path = " + "'" + getPath + "'"
+									+ " WHERE pgmember_id = " + "'" + memberId + "'" + "";
+							logger.info("getPath:"+getPath);
+							
+							CallableStatement callableStatement_ = conn.prepareCall(SQLQuery);
+							callableStatement_.execute();
+						}
+
+					}
+				}
+
+					java.sql.CallableStatement callableStatement = conn
+							.prepareCall("{call pr_get_messagedescription(?,?,?)}");
+					String msgCode_ = ApplicationProperties.MessageCode();
+					String errormsgCode=ApplicationProperties.ErrorMessageCode();
+					
+					callableStatement.setString(1, msgCode);
+					callableStatement.setString(2, langCode);
+					callableStatement.registerOutParameter(3, java.sql.Types.REF_CURSOR);
+					callableStatement.execute();
+					rs = (ResultSet) callableStatement.getObject(3);
+					rs.next();
+					result = (String) rs.getObject("fn_get_msg");
+					
+//					if(result.isEmpty()||(result == null)) {
+//						result= "No message available for msg id";
+//						a = 0;
+//					}
+//					System.out.println("result:" + result);
+//					
+				}
+
+			
+
+			conn.commit();
+			conn.close();
+			//return "line No -" + String.valueOf(i) + "- " + result + ":" + a;
+          return result+ ":" + a;
+
+		} catch (Exception e) {
+			System.out.println("Exception:" + e.getLocalizedMessage());
+			System.out.println("langcode:" + langCode);
+			conn.rollback();
+			conn.close();
+			return "line No -" + String.valueOf(i) + ", " + "Error Query - " + "" + ", error msg - "
+					+ e.getLocalizedMessage() + ":" + a;
+
+		}
+		//return "result";
+
+	}

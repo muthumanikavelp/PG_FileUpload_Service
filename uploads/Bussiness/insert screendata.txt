@@ -1,0 +1,87 @@
+ctrl_slno	screendata_gid	screen_code	lang_code	ctrl_type_code	ctrl_id	data_field	label_desc	tooltip_desc	default_label_desc	default_tooltip_desc	ctrl_slno-2	created_date	created_by	updated_date	updated_by
+1	109	W08OBICXX	en_US	LABEL	onboarding		On-Boarding	On-Boarding	On-Boarding	On-Boarding	1	36:25.6	Admin	NULL	NULL
+2	110	W08OBICXX	en_US	LABEL	pg_id		PG ID	PG ID	PG ID	PG ID	2	36:25.6	Admin	NULL	NULL
+3	111	W08OBICXX	en_US	LABEL	status_desc		Draft	Draft	Draft	Draft	3	36:25.6	Admin	NULL	NULL
+4	112	W08OBICXX	en_US	LABEL	new		New	New	New	New	4	36:25.6	Admin	NULL	NULL
+5	113	W08OBICXX	en_US	LABEL	pg_name		PG Name	PG Name	PG Name	PG Name	5	36:25.6	Admin	NULL	NULL
+6	114	W08OBICXX	en_US	LABEL	pg_ll_name		निर्माता का नाम	निर्माता का नाम	निर्माता का नाम	निर्माता का नाम	6	36:25.6	Admin	NULL	NULL
+7	115	W08OBICXX	en_US	LABEL	pg_type_desc		PG Type	PG Type	PG Type	PG Type	7	36:25.6	Admin	NULL	NULL
+8	116	W08OBICXX	en_US	LABEL	formation_date		Date of Formation	Date of Formation	Date of Formation	Date of Formation	8	36:25.6	Admin	NULL	NULL
+9	117	W08OBICXX	en_US	LABEL	promoter_desc		PG Promoted Under	PG Promoted Under	PG Promoted Under	PG Promoted Under	9	36:25.6	Admin	NULL	NULL
+10	118	W08OBICXX	en_US	LABEL	village_desc		Villages Covered by PG	Villages Covered by PG	Villages Covered by PG	Villages Covered by PG	10	36:25.6	Admin	NULL	NULL
+10	196	W08OBICXX	en_US	LABEL	udyogMitraName	null	Udyog Mitra Name	Udyog Mitra Name	Udyog Mitra Name	Udyog Mitra Name	10	57:15.8	Admin	NULL	NULL
+11	119	W08OBICXX	en_US	LABEL	pg_member		Members Associated with PG	Members Associated with PG	Members Associated with PG	Members Associated with PG	11	36:25.6	Admin	NULL	NULL
+12	120	W08OBICXX	en_US	LABEL	pg_address		Address	Address	Address	Address	12	36:25.6	Admin	NULL	NULL
+13	121	W08OBICXX	en_US	LABEL	pg_bank		Bank	Bank	Bank	Bank	13	36:25.6	Admin	NULL	NULL
+14	122	W08OBICXX	en_US	LABEL	pg_udyogMitra		Udyog Mitra	Udyog Mitra	Udyog Mitra	Udyog Mitra	14	36:25.6	Admin	NULL	NULL
+15	123	W08OBICXX	en_US	LABEL	pg_product		Product	Product	Product	Product	15	36:25.6	Admin	NULL	NULL
+16	124	W08OBICXX	en_US	LABEL	pg_officeBearer		Office Bearers	Office Bearers	Office Bearers	Office Bearers	16	36:25.6	Admin	NULL	NULL
+17	125	W08OBICXX	en_US	LABEL	pg_activities		Activities	Activities	Activities	Activities	17	36:25.6	Admin	NULL	NULL
+18	126	W08OBICXX	en_US	LABEL	pg_clf		CLF	CLF	CLF	CLF	18	36:25.6	Admin	NULL	NULL
+19	127	W08OBICXX	en_US	LABEL	pg_financialSummary		Financial Summary	Financial Summary	Financial Summary	Financial Summary	19	36:25.6	Admin	NULL	NULL
+20	128	W08OBICXX	en_US	LABEL	pg_fundSupport		Fund Support	Fund Support	Fund Support	Fund Support	20	36:25.6	Admin	NULL	NULL
+21	129	W08OBICXX	en_US	GRID	AddressGrid	addr_type_desc	Account Type	Account Type	Account Type	Account Type	21	36:25.6	Admin	NULL	NULL
+22	130	W08OBICXX	en_US	GRID	AddressGrid	addr_line	Address Line	Address Line	Address Line	Address Line	22	36:25.6	Admin	NULL	NULL
+23	131	W08OBICXX	en_US	GRID	AddressGrid	pin_code	Pincode	Pincode	Pincode	Pincode	23	36:25.6	Admin	NULL	NULL
+24	132	W08OBICXX	en_US	GRID	AddressGrid	village_desc	Village	Village	Village	Village	24	36:25.6	Admin	NULL	NULL
+25	133	W08OBICXX	en_US	GRID	AddressGrid	panchayat_desc	Gram Panchayat	Gram Panchayat	Gram Panchayat	Gram Panchayat	25	36:25.6	Admin	NULL	NULL
+26	134	W08OBICXX	en_US	GRID	AddressGrid	block_desc	Block	Block	Block	Block	26	36:25.6	Admin	NULL	NULL
+27	135	W08OBICXX	en_US	GRID	AddressGrid	district_desc	District	District	District	District	27	36:25.6	Admin	NULL	NULL
+28	136	W08OBICXX	en_US	GRID	AddressGrid	state_desc	State	State	State	State	28	36:25.6	Admin	NULL	NULL
+29	137	W08OBICXX	en_US	GRID	AddressGrid	country_desc	Country	Country	Country	Country	29	36:25.6	Admin	NULL	NULL
+30	138	W08OBICXX	en_US	GRID	AddressGrid	state_desc	Status	Status	Status	Status	30	36:25.6	Admin	NULL	NULL
+31	139	W08OBICXX	en_US	GRID	BankGrid	bankacc_type_code	Account Type	Account Type	Account Type	Account Type	31	36:25.6	Admin	NULL	NULL
+32	140	W08OBICXX	en_US	GRID	BankGrid	ifsc_code	IFSC Code	IFSC Code	IFSC Code	IFSC Code	32	36:25.6	Admin	NULL	NULL
+33	141	W08OBICXX	en_US	GRID	BankGrid	bank_name	Bank	Bank	Bank	Bank	33	36:25.6	Admin	NULL	NULL
+34	142	W08OBICXX	en_US	GRID	BankGrid	branch_name	Branch	Branch	Branch	Branch	34	36:25.6	Admin	NULL	NULL
+35	143	W08OBICXX	en_US	GRID	BankGrid	bankacc_no	Account No.	Account No.	Account No.	Account No.	35	36:25.6	Admin	NULL	NULL
+36	144	W08OBICXX	en_US	GRID	BankGrid	confirmacc_no	Confirm Account No.	Confirm Account No.	Confirm Account No.	Confirm Account No.	36	36:25.6	Admin	NULL	NULL
+37	145	W08OBICXX	en_US	GRID	BankGrid	status_desc	Status	Status	Status	Status	37	36:25.6	Admin	NULL	NULL
+38	146	W08OBICXX	en_US	GRID	Udyog MitraGrid	udyogmitra_id	Udyog Mitra ID	Udyog Mitra ID	Udyog Mitra ID	Udyog Mitra ID	38	36:25.6	Admin	NULL	NULL
+39	147	W08OBICXX	en_US	GRID	Udyog MitraGrid	udyogmitra_name	Name Of Udyog Mitra	Name Of Udyog Mitra	Name Of Udyog Mitra	Name Of Udyog Mitra	39	36:25.6	Admin	NULL	NULL
+40	148	W08OBICXX	en_US	GRID	Udyog MitraGrid	mobile_no	Mobile No.	Mobile No.	Mobile No.	Mobile No.	40	36:25.6	Admin	NULL	NULL
+41	149	W08OBICXX	en_US	GRID	Udyog MitraGrid	status_desc	Status	Status	Status	Status	41	36:25.6	Admin	NULL	NULL
+42	150	W08OBICXX	en_US	GRID	ProductGrid	prod_code	Product	Product	Product	Product	42	36:25.6	Admin	NULL	NULL
+43	151	W08OBICXX	en_US	GRID	ProductGrid	prod_type_desc	Product Type	Product Type	Product Type	Product Type	43	36:25.6	Admin	NULL	NULL
+44	152	W08OBICXX	en_US	GRID	ProductGrid	category_desc	Category	Category	Category	Category	44	36:25.6	Admin	NULL	NULL
+45	153	W08OBICXX	en_US	GRID	ProductGrid	subcategory_desc	Sub-Category	Sub-Category	Sub-Category	Sub-Category	45	36:25.6	Admin	NULL	NULL
+46	154	W08OBICXX	en_US	GRID	ProductGrid	frequent_flag	Frequent Flag	Frequent Flag	Frequent Flag	Frequent Flag	46	36:25.6	Admin	NULL	NULL
+47	155	W08OBICXX	en_US	GRID	ProductGrid	status_desc	Status	Status	Status	Status	47	36:25.6	Admin	NULL	NULL
+48	156	W08OBICXX	en_US	GRID	Office BearersGid	offbearer_name	Name	Name	Name	Name	48	36:25.6	Admin	NULL	NULL
+49	157	W08OBICXX	en_US	GRID	Office BearersGid	designation_desc	Designation	Designation	Designation	Designation	49	36:25.6	Admin	NULL	NULL
+50	158	W08OBICXX	en_US	GRID	Office BearersGid	signatory_desc	Signatory	Signatory	Signatory	Signatory	50	36:25.6	Admin	NULL	NULL
+51	159	W08OBICXX	en_US	GRID	Office BearersGid	mobile_no	Contact No.	Contact No.	Contact No.	Contact No.	51	36:25.6	Admin	NULL	NULL
+52	160	W08OBICXX	en_US	GRID	ActivitiesGrid	seq_no	Sl.No	Sl.No	Sl.No	Sl.No	52	36:25.6	Admin	NULL	NULL
+53	161	W08OBICXX	en_US	GRID	ActivitiesGrid	activity_desc	Activities	Activities	Activities	Activities	53	36:25.6	Admin	NULL	NULL
+54	162	W08OBICXX	en_US	GRID	CLFGrid	clf_id	CLF ID	CLF ID	CLF ID	CLF ID	54	36:25.6	Admin	NULL	NULL
+55	163	W08OBICXX	en_US	GRID	CLFGrid	clf_name	CLF Name	CLF Name	CLF Name	CLF Name	55	36:25.6	Admin	NULL	NULL
+56	164	W08OBICXX	en_US	GRID	CLFGrid	clf_officer_id	CLF Officer ID	CLF Officer ID	CLF Officer ID	CLF Officer ID	56	36:25.6	Admin	NULL	NULL
+57	165	W08OBICXX	en_US	GRID	CLFGrid	clf_officer_name	CLF Officer Name	CLF Officer Name	CLF Officer Name	CLF Officer Name	57	36:25.6	Admin	NULL	NULL
+58	166	W08OBICXX	en_US	GRID	CLFGrid	status_desc	Status	Status	Status	Status	58	36:25.6	Admin	NULL	NULL
+59	167	W08OBICXX	en_US	GRID	Financial SummaryGrid	till_date	Till Month/Year	Till Month/Year	Till Month/Year	Till Month/Year	59	36:25.6	Admin	NULL	NULL
+60	168	W08OBICXX	en_US	GRID	Financial SummaryGrid	cash_in_hand	Cash in hand	Cash in hand	Cash in hand	Cash in hand	60	36:25.6	Admin	NULL	NULL
+61	169	W08OBICXX	en_US	GRID	Financial SummaryGrid	cash_in_bank	Cash in Bank	Cash in Bank	Cash in Bank	Cash in Bank	61	36:25.6	Admin	NULL	NULL
+62	170	W08OBICXX	en_US	GRID	Financial SummaryGrid	opening_stock_value	Cost of opening stock	Cost of opening stock	Cost of opening stock	Cost of opening stock	62	36:25.6	Admin	NULL	NULL
+63	171	W08OBICXX	en_US	GRID	Fund SupportGrid	fund_source_desc	Source Of Fund	Source Of Fund	Source Of Fund	Source Of Fund	63	36:25.6	Admin	NULL	NULL
+64	172	W08OBICXX	en_US	GRID	Fund SupportGrid	fund_type_desc	Type Of Support	Type Of Support	Type Of Support	Type Of Support	64	36:25.6	Admin	NULL	NULL
+65	173	W08OBICXX	en_US	GRID	Fund SupportGrid	fund_supp_date	Date	Date	Date	Date	65	36:25.6	Admin	NULL	NULL
+66	174	W08OBICXX	en_US	GRID	Fund SupportGrid	purpose_desc	Purpose	Purpose	Purpose	Purpose	66	36:25.6	Admin	NULL	NULL
+67	175	W08OBICXX	en_US	GRID	Fund SupportGrid	fund_supp_amount	Amount	Amount	Amount	Amount	67	36:25.6	Admin	NULL	NULL
+68	176	W08OBICXX	en_US	GRID	Fund SupportGrid	total_amount	Total Amount (₹)	Total Amount (₹)	Total Amount (₹)	Total Amount (₹)	68	36:25.6	Admin	NULL	NULL
+69	177	W08OBICXX	en_US	LABEL	_pgattachment_gid		Attachment ID	Attachment ID	Attachment ID	Attachment ID	69	13:24.6	Admin	NULL	NULL
+70	178	W08OBICXX	en_US	LABEL	_doc_type_code		Group	Group	Group	Group	70	13:24.6	Admin	NULL	NULL
+71	179	W08OBICXX	en_US	LABEL	_doc_subtype_code		Sub Group	Sub Group	Sub Group	Sub Group	71	13:24.6	Admin	NULL	NULL
+72	180	W08OBICXX	en_US	LABEL	_file_name		File Name	File Name	File Name	File Name	72	13:24.6	Admin	NULL	NULL
+73	183	W08OBICXX	en_US	LABEL	_attachment_remark		Remarks	Remarks	Remarks	Remarks	73	13:24.6	Admin	NULL	NULL
+74	181	W08OBICXX	en_US	LABEL	Version		Version	Version	Version	Version	74	13:24.6	Admin	NULL	NULL
+75	182	W08OBICXX	en_US	LABEL	Size		Size	Size	Size	Size	75	13:24.6	Admin	NULL	NULL
+76	184	W08OBICXX	en_US	LABEL	_pg_id		_pg_id	_pg_id	_pg_id	_pg_id	76	21:02.8	Admin	NULL	NULL
+77	185	W08OBICXX	en_US	LABEL	_file_path		_file_path	_file_path	_file_path	_file_path	77	21:02.8	Admin	NULL	NULL
+78	186	W08OBICXX	en_US	LABEL	_mode_flag		_mode_flag	_mode_flag	_mode_flag	_mode_flag	78	21:02.8	Admin	NULL	NULL
+79	187	W08OBICXX	en_US	GRID	PGOnboardingAttachment	file_path	file_path	file_path	file_path	file_path	79	21:02.8	Admin	NULL	NULL
+79	193	W08OBICXX	en_US	GRID	PGOnboardingAttachment	doc_type_desc	Group	doc_type_code	doc_type_code	doc_type_code	79	21:02.8	Admin	NULL	NULL
+80	188	W08OBICXX	en_US	GRID	PGOnboardingAttachment	doc_subtype_desc	Sub Group	doc_subtype_code	doc_subtype_code	doc_subtype_code	80	21:02.8	Admin	NULL	NULL
+81	189	W08OBICXX	en_US	GRID	PGOnboardingAttachment	file_name	File Name	file_name	file_name	file_name	81	21:02.8	Admin	NULL	NULL
+82	192	W08OBICXX	en_US	GRID	PGOnboardingAttachment	attachment_remark	Remarks	attachment_remark	attachment_remark	attachment_remark	82	21:02.8	Admin	NULL	NULL
+83	191	W08OBICXX	en_US	GRID	PGOnboardingAttachment	pg_id	pg_id	pg_id	pg_id	pg_id	83	21:02.8	Admin	NULL	NULL
+84	190	W08OBICXX	en_US	GRID	PGOnboardingAttachment	pgattachment_gid	pgattachment_gid	pgattachment_gid	pgattachment_gid	pgattachment_gid	84	21:02.8	Admin	NULL	NULL

@@ -1,0 +1,175 @@
+[
+    [
+        {
+            "pg_type_code": "F",
+            "promoter_code": "NERLP",
+            "status_code": "A",
+            "block_desc": "",
+            "status_desc": "Active",
+            "village_desc": "",
+            "promoter_desc": "Farm",
+            "row_timestamp": "2021-12-12T23:48:57.624+00:00",
+            "district_desc": "",
+            "pg_gid": 1,
+            "created_by": "admin",
+            "formation_date": "2020-12-19",
+            "state_desc": "",
+            "pg_name": "Tulukapatti Producer Group Sangam",
+            "pg_id": "PG001",
+            "created_date": "2021-12-12T23:48:57.624+00:00",
+            "panchayat_desc": ""
+        }
+    ],
+    [
+        {
+            "village_id": 0,
+            "block_desc": "",
+            "village_desc": "",
+            "addr_type_code": "PERMANENT",
+            "pin_code": "249923",
+            "addr_type_desc": "Permanent",
+            "addr_line": "13, Beebra - Bilaspur Main Road",
+            "district_desc": "",
+            "panchayat_id": 0,
+            "block_id": 0,
+            "state_desc": "",
+            "pgaddress_gid": 1,
+            "pg_id": "PG001",
+            "district_id": 0,
+            "state_id": 0,
+            "panchayat_desc": ""
+        }
+    ],
+    [
+        {
+            "ifsc_code": "SBIN0001199",
+            "bank_code": "SBI",
+            "bankacc_type_desc": "",
+            "bankacc_no": "349876521",
+            "bankacc_type_code": "Savings",
+            "bank_desc": "State Bank of India",
+            "branch_name": "Bilaspur",
+            "bank_name": "State Bank of India",
+            "pgbank_gid": 1,
+            "pg_id": "PG001"
+        }
+    ],
+    [
+        {
+            "pgudyogmitra_gid": 1,
+            "udyogmitra_id": "UDM001",
+            "token_no": "",
+            "status_desc": "",
+            "mobile_no": "6380611603",
+            "pg_id": "PG001",
+            "udyogmitra_name": "Rajesh Chauhan",
+            "tran_status_code": "A"
+        }
+    ],
+    [
+        {
+            "pgprodmapp_gid": 2,
+            "frequent_flag": "Y",
+            "prod_type_code": "N",
+            "prod_type_desc": "Non - Perishable",
+            "subcategory_desc": "Cereals",
+            "category_code": "GRAINS",
+            "pg_id": "PG001",
+            "category_desc": "Grains",
+            "prod_code": "PADDY",
+            "subcategory_code": "CEREALS"
+        }
+    ],
+    [
+        {
+            "designation_desc": "Director",
+            "signatory_code": "1ST",
+            "offbearer_name": "Mohan",
+            "mobile_no": "6380611603",
+            "pg_id": "PG001",
+            "designation_code": "DIRECTOR",
+            "signatory_desc": "1st",
+            "pgoffbearer_gid": 1
+        },
+        {
+            "designation_desc": "Director",
+            "signatory_code": "2ND",
+            "offbearer_name": "Des",
+            "mobile_no": "9867869789",
+            "pg_id": "PG001",
+            "designation_code": "Director",
+            "signatory_desc": "2nd",
+            "pgoffbearer_gid": 4
+        }
+    ],
+    [
+        {
+            "seq_no": 1,
+            "activity_desc": "Grading",
+            "pg_id": "PG001",
+            "pgactivitity_gid": 1,
+            "activity_code": "GRADING"
+        }
+    ],
+    [
+        {
+            "pgclf_gid": 1,
+            "clf_officer_name": "Ramesh Govind P",
+            "pg_id": "PG001",
+            "clf_id": "CLF001",
+            "clf_name": "Bilaspur",
+            "clf_officer_id": "CLFO - 002"
+        },
+        {
+            "pgclf_gid": 3,
+            "clf_officer_name": "Gowtham S",
+            "pg_id": "PG001",
+            "clf_id": "Act1",
+            "clf_name": "Bilaspur1",
+            "clf_officer_id": "S"
+        }
+    ],
+    [
+        {
+            "pgfinsumm_gid": 1,
+            "pg_id": "PG001",
+            "cash_in_hand": 150000.00,
+            "till_date": "2021-12-14",
+            "cash_in_bank": 200000.00,
+            "opening_stock_value": 750000.00
+        },
+        {
+            "pgfinsumm_gid": 3,
+            "pg_id": "PG001",
+            "cash_in_hand": 20000.00,
+            "till_date": "2021-09-22",
+            "cash_in_bank": 30000.00,
+            "opening_stock_value": 35000.00
+        }
+    ],
+    [
+        {
+            "fund_source_desc": "CLF",
+            "fund_type_code": "GRANT",
+            "fund_supp_amount": 500000.00,
+            "fund_supp_date": "2021-12-14",
+            "fund_type_desc": "Grant",
+            "purpose_desc": "Infrastructure",
+            "pg_id": "PG001",
+            "pgfundsupp_gid": 1,
+            "fund_source_code": "CLF"
+        },
+        {
+            "fund_source_desc": "NRLM",
+            "fund_type_code": "Grant",
+            "fund_supp_amount": 24000.00,
+            "fund_supp_date": "2012-08-12",
+            "fund_type_desc": "Grant",
+            "purpose_desc": "Nrlm_grant",
+            "pg_id": "PG001",
+            "pgfundsupp_gid": 3,
+            "fund_source_code": "NRLM"
+        }
+    ],
+    []
+]

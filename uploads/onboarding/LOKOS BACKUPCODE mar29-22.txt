@@ -1,0 +1,241 @@
+LOKOS BACKUPCODE
+
+
+
+package com.Lokos.NRLM.LokosToPgdatasync.Controller;
+
+import java.net.URISyntaxException;
+import java.net.http.HttpHeaders;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Properties;
+import java.util.function.Function;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.function.ServerRequest.Headers;
+import com.Lokos.NRLM.LokosToPgdatasync.CommonFunction;
+import com.Lokos.NRLM.LokosToPgdatasync.Commonconfiguration;
+import com.Lokos.NRLM.LokosToPgdatasync.Model.JwtRequest;
+
+@RestController
+@CrossOrigin()
+@Component
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class })
+public class Lokossync_Controller {
+	Logger logger = LoggerFactory.getLogger(Lokossync_Controller.class);
+	
+	String json = "";
+	CommonFunction Objcom;
+
+	@Autowired
+	private Commonconfiguration commonConfiguration;
+	@Value("${lokos.PgUrl}")
+	private String Pgurl;
+
+	@Value("${lokosToPgURL}")
+	private String lokosUrl;
+	
+	@PostMapping("/getlokosToPgDatasync")
+	public ResponseEntity<String> getlokosToPgDatasync() throws NoSuchElementException, java.sql.SQLException {
+		RestTemplate resttemplate = new RestTemplate();
+
+		ResultSet rs = null;
+		String SQLQuery = "";
+		String col_name = "";
+		try {
+			JwtRequest objs= new JwtRequest();
+			objs.setUsername("flexicode");
+			objs.setPassword("password");
+			
+
+			  ResponseEntity<String> auth = resttemplate.postForEntity("http://localhost:8090/authenticate",objs, String.class);
+			  System.out.println("auth:"+auth);
+			  System.out.println(auth.getBody());
+			  JSONObject jsonObj = new JSONObject(auth.getBody());
+			  String authestr= jsonObj.getString("token");
+			 
+			   //String base64Creds = Base64.getEncoder().encodeToString(authstr.getBytes());
+			   System.out.println("base64Creds:"+authestr);
+			   MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
+			   headers.add("Content-Type", "application/json");
+			 headers.add("Authorization",  "Bearer " + authestr);
+			   HttpEntity request = new HttpEntity(headers);
+			   System.out.println("request:"+request);
+			//ResponseEntity<String> result = restTemplate.exchange("http://169.38.77.181:8080/Test/getlokossyncqry?stateId=&userCode=&lastSyncdate=2022-01-11", HttpMethod.POST,request, String.class);
+
+			ResponseEntity<String> result = resttemplate.postForEntity("http://localhost:8090/getlokossyncqry?stateId=&userCode=&lastSyncdate=2022-01-11", request, String.class);
+			// Monika code
+			JSONArray array = new JSONArray(result.getBody());
+			JSONObject object = new JSONObject();
+			
+			for (int i = 0; i < array.length(); i++) {
+				
+				
+				JSONArray Value = new JSONArray();
+				object = array.getJSONObject(i);
+				SQLQuery = object.getString("lokossync_qry");
+				String spName = object.getString("pg_sp_name");
+				String url="jdbc:postgresql://169.38.82.134:5432/lokos";
+				String	username="postgres";
+				String password="Flexi@123";
+//				username ="postgres";
+//				password ="Flexi@123";
+			
+				Connection conn= commonConfiguration.connect(url,username,password);
+				logger.info("conn open");
+				CallableStatement call = conn.prepareCall(SQLQuery);
+				logger.info("call statement");
+				rs = call.executeQuery();
+				ResultSetMetaData rsmd = ((ResultSet) rs).getMetaData();
+				JSONObject Outerobj = new JSONObject();
+				JSONObject innerobj;
+				while (((ResultSet) rs).next()) {
+					innerobj = new JSONObject();
+					int numColumns = rsmd.getColumnCount();
+					for (int i1 = 1; i1 <= numColumns; i1++) {
+						col_name = rsmd.getColumnName(2);
+						String column_name = rsmd.getColumnName(i1);
+						innerobj.put(column_name, ((ResultSet) rs).getObject(column_name));
+					}
+					Value.put(innerobj);
+					System.out.println("innerobj:" + innerobj);
+
+				}
+				String data = Value.toString();
+				Outerobj.put("spName", spName);
+				Outerobj.put("spValue", Value);
+				System.out.println("Outerobj:" + Outerobj);
+				String spValue = Outerobj.toString();
+				//start
+				 String authstr= jsonObj.getString("token");
+				MultiValueMap<String, String> map= new LinkedMultiValueMap<String, String>();
+				map.add("spValue", data);
+				//map.add("spName", spName);
+		
+				   headers.add("Content-Type", "application/json");
+				 headers.add("Authorization",  "Bearer " + authstr);
+				 HttpEntity<String> req = new HttpEntity<String>(spValue, headers);
+				 System.out.println("req:"+req);
+				ResponseEntity<String> rest = resttemplate.exchange(lokosUrl,HttpMethod.POST,req, String.class);
+				System.out.println("rest:"+rest);
+				if(col_name.contains("spName")){
+					logger.info("Bank Success");
+				}
+				else {
+					logger.info("State Success");
+				}
+				conn.close();	
+				
+			}
+			
+			logger.info("queryName" + "Completed");
+			
+		}
+
+		catch (NoSuchElementException e) {
+			logger.error(e.getMessage());
+			if(col_name.contains("Bank")){
+				logger.info("Bank Failure");
+			}
+			else {
+				logger.info("State Failure");
+			}
+			throw new NoSuchElementException(e.getMessage());
+
+		}
+		return ResponseEntity.ok("Lokos Data Sync SuccessFully");
+
+	}
+
+}
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			
+			//ResponseEntity<String>rest =resttemplate.postForEntity(URL, json.toString(), String.class);
+			// ResponseEntity<String> combined = new
+			// ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+
+//			String data = Objloksyncser.getlokosToPgDatasync(lokossyncqry_rs);
+//			String	json = new Gson().toJson(data);
+//			System.out.println("json:"+json);
+//			
+//           return ResponseEntity.ok(gson.toJson(data));
+//		return json;
+			// ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+			// JSONArray query= new JSONArray();
+//			 System.out.println("lokossyncqry_rs1:"+lokossyncqry_rs);
+//			lokossyncqry_rs =  Objloksyncser.getlokosToPgDatasync(lokossyncqry_rs);
+////			System.out.println("lokossyncqry_rs:"+lokossyncqry_rs);
+//			return combined;
+			// System.out.println("lokossyncqry_rs:"+lokossyncqry_rs);
+//			ResponseEntity<String> combined = new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+//			JSONArray lokos= new JSONArray();
+//			JSONObject Objjson= lokos.getJSONObject(0);
+//			String query =Objjson.getString("lokossync_qry");
+//			//System.out.println("query:"+query);
+//			lokossyncqry_rs = Objloksyncser.getlokosToPgDatasync(query);
+////			((List) combined).add(Objcom.toList(lokossyncqry_rs));
+//			json = new Gson().toJson(combined);
+//			return lokossyncqry_rs ;
+
+		

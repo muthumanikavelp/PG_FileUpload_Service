@@ -1,0 +1,32 @@
+https://www.youtube.com/watch?v=th3uIP7D8nk
+https://www.logicbig.com/tutorials/spring-framework/spring-data-access-with-jdbc/spring-call-stored-procedure.html
+
+client (postman) --> Controller(also call as API Layer) --> Service (also known as BL) --> DAO (Persistence Logic,Data access layer) --> DB
+                 (GET,POST,PUT,Delete)
+
+Dependencies 
+Web
+JPA
+mysql driver
+lombok (AI)
+	get & set methods 
+
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.jdbc.core.JdbcTemplate;
+
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
+import org.springframework.jdbc.core.SqlReturnResultSet;
+import org.springframework.jdbc.object.StoredProcedure;
+
+
+Table
+
+label 1		name	name	name
+label 2
+
+create table emp (empname varchar

@@ -1,0 +1,82 @@
+iNTERFACE:
+
+	public ResultSet getPanchayatmaplist(String pgId ,int refCursor)throws NoSuchElementException, java.sql.SQLException;
+
+************************************************
+
+DAO:
+
+public ResultSet getPanchayatmaplist(String pgId, int refCursor)
+			throws NoSuchElementException, java.sql.SQLException {
+		Connection conn = commonConfiguration.connect();
+		java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_panchayatmappedlist(?,?)}");
+		conn.setAutoCommit(false);
+		try {
+			callableStatement.setString(1, pgId);
+			callableStatement.registerOutParameter(2, java.sql.Types.REF_CURSOR);
+			callableStatement.execute();
+			ResultSet rs = null;
+			rs = (ResultSet) callableStatement.getObject(refCursor);
+			conn.commit();
+			conn.close();
+			return rs;
+
+		} catch (SQLException ex) {
+			throw ex;
+		}
+	}
+*********************************************************************
+
+
+SERVICE:
+
+
+public JSONArray getPanchayatmaplist(String pgId,int refCursor)
+			throws NoSuchElementException, java.sql.SQLException {
+		try {
+			ResultSet panchayatmaplist_rs = objonboardingdao.getPanchayatmaplist(pgId,refCursor);
+
+			JSONArray json = new JSONArray();
+
+			ResultSetMetaData rsmd = ((ResultSet) panchayatmaplist_rs).getMetaData();
+			int column_count = rsmd.getColumnCount();
+			while (((ResultSet) panchayatmaplist_rs).next()) {
+				int numColumns = rsmd.getColumnCount();
+				JSONObject obj = new JSONObject();
+				for (int i1 = 1; i1 <= numColumns; i1++) {
+					String column_name = rsmd.getColumnName(i1);
+					obj.put(column_name, ((ResultSet) panchayatmaplist_rs).getObject(column_name));
+				}
+
+				json.put(obj);
+			}
+
+			return json;
+		} catch (SQLException e) {
+			throw e;
+		}
+	}
+
+******************************************************************
+
+CONTROLLER:
+
+@ApiOperation(value = "PanchayatMappedlist", notes = "To get the list of Panchayatmapped from ProducerGroup", response = String.class)
+
+	@GetMapping("/getPanchayatmaplist")
+	public ArrayList<List<Object>> getPanchayatmaplist(
+			@ApiParam(value = "Getting list from ProducerGroup") @RequestParam String pgId)
+			throws NoSuchElementException, java.sql.SQLException {
+		try {
+			Objcomm = new Common_Function();
+			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+			JSONArray panchayatlist_pg = new JSONArray();
+			panchayatlist_pg = onboarding_service.getPanchayatmaplist(pgId, 2);
+			combined.add(Objcomm.toList(panchayatlist_pg));
+			json = new Gson().toJson(combined);
+			return combined;
+		} catch (NoSuchElementException e) {
+			logger.error(e.getMessage());
+			throw new NoSuchElementException(e.getMessage());
+		}
+	}

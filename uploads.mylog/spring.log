@@ -1,0 +1,72 @@
+2022-07-02 12:03:31.267  WARN 18448 --- [main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/Admin/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/Admin/.m2/repository/org/json/json/20160810/json-20160810.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2022-07-02 12:03:31.295  INFO 18448 --- [main] c.e.P.PgUploadFileApplicationTests       : Starting PgUploadFileApplicationTests using Java 17.0.2 on DESKTOP-EAGDS91 with PID 18448 (started by Bala Murugan in D:\Monika\NRLM\NRLMUpload file\PGUploadFile)
+2022-07-02 12:03:31.509  INFO 18448 --- [main] c.e.P.PgUploadFileApplicationTests       : No active profile set, falling back to default profiles: default
+2022-07-02 12:03:33.034  INFO 18448 --- [main] c.e.P.PgUploadFileApplicationTests       : Started PgUploadFileApplicationTests in 2.003 seconds (JVM running for 3.492)
+2022-07-02 12:19:27.514  WARN 22660 --- [main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/Admin/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/Admin/.m2/repository/org/json/json/20160810/json-20160810.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2022-07-02 12:19:27.534  INFO 22660 --- [main] c.e.P.PgUploadFileApplicationTests       : Starting PgUploadFileApplicationTests using Java 17.0.2 on DESKTOP-EAGDS91 with PID 22660 (started by Bala Murugan in D:\Monika\NRLM\NRLMUpload file\PGUploadFile)
+2022-07-02 12:19:27.535  INFO 22660 --- [main] c.e.P.PgUploadFileApplicationTests       : No active profile set, falling back to default profiles: default
+2022-07-02 12:19:29.251  INFO 22660 --- [main] c.e.P.PgUploadFileApplicationTests       : Started PgUploadFileApplicationTests in 1.994 seconds (JVM running for 3.122)
+2022-07-02 15:15:44.280  WARN 38824 --- [main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/Admin/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/Admin/.m2/repository/org/json/json/20160810/json-20160810.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2022-07-02 15:15:44.372  INFO 38824 --- [main] c.e.P.PgUploadFileApplicationTests       : Starting PgUploadFileApplicationTests using Java 17.0.2 on DESKTOP-EAGDS91 with PID 38824 (started by Bala Murugan in D:\Monika\NRLM\NRLMUpload file\PGUploadFile)
+2022-07-02 15:15:44.375  INFO 38824 --- [main] c.e.P.PgUploadFileApplicationTests       : No active profile set, falling back to default profiles: default
+2022-07-02 15:15:46.438  INFO 38824 --- [main] c.e.P.PgUploadFileApplicationTests       : Started PgUploadFileApplicationTests in 2.478 seconds (JVM running for 4.194)
+2022-07-02 15:41:57.650  WARN 38940 --- [main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/Admin/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/Admin/.m2/repository/org/json/json/20160810/json-20160810.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2022-07-02 15:41:57.675  INFO 38940 --- [main] c.e.P.PgUploadFileApplicationTests       : Starting PgUploadFileApplicationTests using Java 17.0.2 on DESKTOP-EAGDS91 with PID 38940 (started by Bala Murugan in D:\Monika\NRLM\NRLMUpload file\PGUploadFile)
+2022-07-02 15:41:57.676  INFO 38940 --- [main] c.e.P.PgUploadFileApplicationTests       : No active profile set, falling back to default profiles: default
+2022-07-02 15:41:59.318  INFO 38940 --- [main] c.e.P.PgUploadFileApplicationTests       : Started PgUploadFileApplicationTests in 1.951 seconds (JVM running for 3.085)
+2022-07-02 16:14:36.407  WARN 35692 --- [main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/Admin/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/Admin/.m2/repository/org/json/json/20160810/json-20160810.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2022-07-02 16:14:36.429  INFO 35692 --- [main] c.e.P.PgUploadFileApplicationTests       : Starting PgUploadFileApplicationTests using Java 17.0.2 on DESKTOP-EAGDS91 with PID 35692 (started by Bala Murugan in D:\Monika\NRLM\NRLMUpload file\PGUploadFile)
+2022-07-02 16:14:36.430  INFO 35692 --- [main] c.e.P.PgUploadFileApplicationTests       : No active profile set, falling back to default profiles: default
+2022-07-02 16:14:38.050  INFO 35692 --- [main] c.e.P.PgUploadFileApplicationTests       : Started PgUploadFileApplicationTests in 1.894 seconds (JVM running for 2.899)
+2022-07-02 16:31:01.426  WARN 14256 --- [main] ory$DuplicateJsonObjectContextCustomizer : 
+
+Found multiple occurrences of org.json.JSONObject on the class path:
+
+	jar:file:/C:/Users/Admin/.m2/repository/com/vaadin/external/google/android-json/0.0.20131108.vaadin1/android-json-0.0.20131108.vaadin1.jar!/org/json/JSONObject.class
+	jar:file:/C:/Users/Admin/.m2/repository/org/json/json/20160810/json-20160810.jar!/org/json/JSONObject.class
+
+You may wish to exclude one of them to ensure predictable runtime behavior
+
+2022-07-02 16:31:01.453  INFO 14256 --- [main] c.e.P.PgUploadFileApplicationTests       : Starting PgUploadFileApplicationTests using Java 17.0.2 on DESKTOP-EAGDS91 with PID 14256 (started by Bala Murugan in D:\Monika\NRLM\NRLMUpload file\PGUploadFile)
+2022-07-02 16:31:01.454  INFO 14256 --- [main] c.e.P.PgUploadFileApplicationTests       : No active profile set, falling back to default profiles: default
+2022-07-02 16:31:03.136  INFO 14256 --- [main] c.e.P.PgUploadFileApplicationTests       : Started PgUploadFileApplicationTests in 2.064 seconds (JVM running for 3.125)

@@ -1,0 +1,123 @@
+DAO json array
+for loop in dao
+
+
+Array la irunthu data edukanum
+
+json array in interface
+ rollback panni controller hit aganum
+
+
+
+
+Controller
+
+@GetMapping("/getbussplandownllog")
+
+	public ArrayList<List<Object>> getbussplandownllog(@RequestParam String  pgId, String bussplanId ,int count)
+			throws ClassNotFoundException, SQLException {
+		try {
+			Objcomm = new Common_Function();
+			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+			JSONArray rs_panlist = new JSONArray();
+			rs_panlist = business_service.getbussplandownllog(pgId,bussplanId,3);
+
+			combined.add(Objcomm.toList(rs_panlist));
+			return combined;
+		} catch (NoSuchElementException e) {
+			logger.error(e.getMessage());
+			throw new NoSuchElementException(e.getMessage());
+		}
+	}
+
+
+
+Service
+
+public JSONArray getbussplandownllog(String pgId, String bussplanId, int count)
+								throws ClassNotFoundException, SQLException{
+							try {
+								ResultSet busplandowlog_rs = objbpdao.getbussplandownllog(pgId, bussplanId, count);
+
+								JSONArray json = new JSONArray();
+
+								ResultSetMetaData rsmd = ((ResultSet) busplandowlog_rs).getMetaData();
+								int column_count = rsmd.getColumnCount();
+								while (((ResultSet) busplandowlog_rs).next()) {
+									int numColumns = rsmd.getColumnCount();
+									JSONObject obj = new JSONObject();
+									for (int i1 = 1; i1 <= numColumns; i1++) {
+										String column_name = rsmd.getColumnName(i1);
+										obj.put(column_name, ((ResultSet) busplandowlog_rs).getObject(column_name));
+									}
+									json.put(obj);
+								}
+
+								return json;
+						
+					} catch (SQLException ex) {
+						throw ex;
+					}
+						
+
+					}					
+
+
+
+DAO
+
+public ResultSet getbussplandownllog(String pgId, String bussplanId, int count)
+						throws ClassNotFoundException, SQLException {
+					
+					
+				Connection conn = CommonConfiguration.getInstance().connect();
+				java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_bussplandownloadlog(?,?,?}");
+				conn.setAutoCommit(false);
+				try {
+				callableStatement.setString(1, pgId);
+				callableStatement.setString(2, bussplanId);
+				
+				callableStatement.registerOutParameter(3, java.sql.Types.OTHER);
+				callableStatement.execute();
+				ResultSet rs=null;
+				
+				
+				rs = (ResultSet) callableStatement.getObject(3);
+				conn.commit();
+				
+				conn.close();
+				return rs;
+
+					} catch (SQLException ex) {
+						throw ex;
+					}
+			}
+block_id
+iud vena BusinessPlan
+Url  small letter underscore
+java convention camil case
+Class
+method small secod  captial
+variable same
+bus object produ to the producer grp
+
+URL get underscore
+insert query read pani execute 
+
+jsonarray query vara pothu insert query 
+string variable vanganum
+jsonarray return success and errorl
+
+
+busplan dtl pgid
+blockid
+busplan gid
+typecode
+remarks
+
+DAO sucess anupi service la anupi atha cotroller la anupanum
+
+
+
+
+			

@@ -1,0 +1,44 @@
+import org.json.JSONArray;  
+import org.json.JSONObject;
+import java.nio.charset.StandardCharsets;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+
+/*@PostMapping("/GetPglist")
+	public JSONArray GetPglist(@RequestParam String langCode)
+			throws NoSuchElementException, java.sql.SQLException {
+		try {
+			JSONArray json = new JSONArray();
+			json = onboarding_service.GetPglist(langCode);
+			exchange.getResponseSender().send(json.toString(), StandardCharsets.UTF_8);
+			return json;
+
+		} catch (NoSuchElementException e) {
+			logger.error(e.getMessage());
+			throw new NoSuchElementException(e.getMessage());
+		}
+		
+	}
+
+	*/
+
+
+
+	/*public JSONArray GetPglist(String langCode) throws NoSuchElementException, java.sql.SQLException {
+		List<OnBoarding_Model> onboarding_list = new ArrayList<OnBoarding_Model>();
+		ResultSet onboarding_rs = objonboardingdao.GetPglist(langCode);
+		JSONArray json = new JSONArray();
+		ResultSetMetaData rsmd = onboarding_rs.getMetaData();
+		while(onboarding_rs.next()) {
+		  int numColumns = rsmd.getColumnCount();
+		  JSONObject obj = new JSONObject();
+		  for (int i=1; i<=numColumns; i++) {
+		    String column_name = rsmd.getColumnName(i);
+		    obj.put(column_name, onboarding_rs.getObject(column_name));
+		  }
+		  json.put(obj);
+		}
+		return json;
+	}
+*/

@@ -1,0 +1,108 @@
+{
+	"info": {
+		"_postman_id": "8ba44a71-0af0-43b5-909a-d0ca3388826d",
+		"name": "Upload",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "iudPgattachment",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJmbGV4aWNvZGUiLCJleHAiOjE2NDk4MDY2NzEsImlhdCI6MTY0OTczODI3MX0.b-WqSu5HeNfv-sSDgVIuif1WxKuY3Rd6gE7d7z_QWbdMYUwHmmvZNLP-MKBI_EscH_GGHj7BDrC9YdBjXbvrnQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/D:/Monika/Notepad/uma.txt"
+						},
+						{
+							"key": "gid",
+							"value": "0",
+							"type": "text"
+						},
+						{
+							"key": "pgID",
+							"value": "82",
+							"type": "text"
+						},
+						{
+							"key": "docType",
+							"value": "QCD_ID_PROOF",
+							"type": "text"
+						},
+						{
+							"key": "docSubType",
+							"value": "QCD_PAN_1",
+							"type": "text"
+						},
+						{
+							"key": "filePath",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "fileName",
+							"value": "lokosbank.txt",
+							"type": "text"
+						},
+						{
+							"key": "remarks",
+							"value": "uyiuqud",
+							"type": "text"
+						},
+						{
+							"key": "langCode",
+							"value": "en_US",
+							"type": "text"
+						},
+						{
+							"key": "userCode",
+							"value": "admin",
+							"type": "text"
+						},
+						{
+							"key": "modeFlag",
+							"value": "I",
+							"type": "text"
+						},
+						{
+							"key": "succMsg",
+							"value": "",
+							"type": "text"
+						},
+						{
+							"key": "orgverifiedflag",
+							"value": "Y",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8090/iudPgattachment",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8090",
+					"path": [
+						"iudPgattachment"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

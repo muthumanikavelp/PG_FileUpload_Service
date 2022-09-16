@@ -1,0 +1,31 @@
+cd /opt/systemd/system
+ls
+vi Service  file create
+
+
+[Unit]
+Description=My Java driven simple service
+After=syslog.target network.target
+
+[Service]
+SuccessExitStatus=143
+
+User=jvmapp
+Group=appmgr
+
+Type=simple
+
+#Environment="JAVA_HOME=/path/to/jvmdir"
+WorkingDirectory=/opt/Cron
+ExecStart=/bin/java -jar Cron.jar
+ExecStop=/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+
+
+sudo systemctl daemon-reload
+sudo systemctl enable my-webapp.service
+sudo systemctl start my-webapp
+sudo systemctl status my-webapp
+

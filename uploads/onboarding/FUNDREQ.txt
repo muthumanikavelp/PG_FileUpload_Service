@@ -1,0 +1,216 @@
+FUND INTERFACE:
+
+
+public ResultSet iudFDrequisition(int fundreqGid, String pgID, String blockofficerID, String bussplanID,
+			String fundreqID, BigDecimal totfundreqAmount, String reviewertypeCode, int clfblockID,
+			String reviewerCode, String fundreqRemark, Date lastactionDate, String statusCode,
+			String langCode, String userCode, String modeFlag, String rowTimestamp, String succMsg)
+			throws ClassNotFoundException, java.sql.SQLException;
+
+*****************************
+
+FUNDREQ DAO:
+
+
+public class FundRequisition_DAO implements FundRequisition_Interface {
+
+
+
+	public ResultSet iudFDrequisition(int fundreqGid, String pgID, String blockofficerID, String bussplanID,
+			String fundreqID, BigDecimal totfundreqAmount, String reviewertypeCode, int clfblockID, String reviewerCode,
+			String fundreqRemark, Date lastactionDate, String statusCode, String langCode, String userCode,
+			String modeFlag, String rowTimestamp, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+
+		Connection conn = CommonConfiguration.getInstance().connect();
+		conn.setAutoCommit(false);
+	
+		
+		try {
+
+			PreparedStatement preparedStatement = conn
+					.prepareStatement("call pr_iud_fundrequisition(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+
+			ResultSet rs = null;
+
+			preparedStatement.setInt(1, fundreqGid);
+			preparedStatement.setString(2, pgID);
+			preparedStatement.setString(3, blockofficerID);
+			preparedStatement.setString(4, bussplanID);
+			preparedStatement.setString(5, fundreqID);
+			preparedStatement.setBigDecimal(6, totfundreqAmount);
+			preparedStatement.setString(7, reviewertypeCode);
+
+			preparedStatement.setInt(8, clfblockID);
+			preparedStatement.setString(9, reviewerCode);
+			preparedStatement.setString(10, fundreqRemark);
+			preparedStatement.setDate(11,lastactionDate);
+			preparedStatement.setString(12, statusCode);
+			preparedStatement.setString(13, langCode);
+
+			preparedStatement.setString(14, userCode);
+			preparedStatement.setString(15, modeFlag);
+			preparedStatement.setString(16, rowTimestamp);
+			preparedStatement.setString(17, succMsg);
+
+			rs = preparedStatement.executeQuery();
+
+			conn.commit();
+
+			return rs;
+
+		} catch (SQLException ex) {
+			throw ex;
+		}
+
+	}
+
+	
+}
+
+
+
+
+
+***************************
+
+
+FUNDREQ SERVICE:
+
+
+	FundRequisition_DAO Objfundreqdao = new FundRequisition_DAO();
+
+	public JSONArray iudFDrequisition(int fundreqGid, String pgID, String blockofficerID, String bussplanID,
+			String fundreqID, BigDecimal totfundreqAmount, String reviewertypeCode, int clfblockID, String reviewerCode,
+			String fundreqRemark, Date lastactionDate, String statusCode, String langCode, String userCode,
+			String modeFlag, String rowTimestamp, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+		try {
+
+			ResultSet fundReq_rs = Objfundreqdao.iudFDrequisition(fundreqGid, pgID, blockofficerID, bussplanID,
+					fundreqID, totfundreqAmount, reviewertypeCode, clfblockID, reviewerCode,fundreqRemark, lastactionDate, statusCode, langCode, userCode, modeFlag, rowTimestamp, succMsg);
+
+			JSONArray json = new JSONArray();
+			ResultSetMetaData rsmd = ((ResultSet) fundReq_rs).getMetaData();
+			int column_count = rsmd.getColumnCount();
+			while (((ResultSet) fundReq_rs).next()) {
+				int numColumns = rsmd.getColumnCount();
+				JSONObject obj = new JSONObject();
+				for (int i1 = 1; i1 <= numColumns; i1++) {
+					String column_name = rsmd.getColumnName(i1);
+					obj.put(column_name, ((ResultSet) fundReq_rs).getObject(column_name));
+				}
+				json.put(obj);
+			}
+
+			return json;
+
+		} catch (SQLException ex) {
+			throw ex;
+		}
+
+	}
+
+
+
+*************************************
+
+
+CONTROLLER:
+
+
+@CrossOrigin(origins = "http://localhost:4200")
+@RestController
+public class FundRequisition_Controller {
+	
+	Logger logger = LoggerFactory.getLogger(FundRequisition_Controller.class);
+	@Autowired
+	FundRequisition_Service objFundReqService;
+
+	FundRequisition_Common_Model fundRequisitionCommonModel;
+	String json = "";
+	
+	@NonNull
+	@Column(columnDefinition = "TEXT")
+	@JsonIgnore
+	private JSONObject jsonData;
+
+	public FundRequisition_Controller(FundRequisition_Service objFundReqService) {
+		this.objFundReqService = objFundReqService;
+
+	}
+
+	@JsonProperty("jsonData")
+	public Map<String, Object> getAsJsonString() throws IOException, JSONException {
+		return toMap(jsonData);
+	}
+	
+	
+	
+	
+	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+		Map<String, Object> map = new HashMap<String, Object>();
+
+		Iterator<String> keysItr = object.keys();
+		while (keysItr.hasNext()) {
+			String key = keysItr.next();
+			Object value = object.get(key);
+
+			if (value instanceof JSONArray) {
+				value = toList((JSONArray) value);
+			}
+
+			else if (value instanceof JSONObject) {
+				value = toMap((JSONObject) value);
+			}
+			map.put(key, value);
+		}
+		return map;
+	}
+
+	public List<Object> toList(JSONArray array) throws JSONException {
+		List<Object> list = new ArrayList<Object>();
+		for (int i = 0; i < array.length(); i++) {
+			Object value = array.get(i);
+			if (value instanceof JSONArray) {
+				value = toList((JSONArray) value);
+			}
+
+			else if (value instanceof JSONObject) {
+				value = toMap((JSONObject) value);
+			}
+			list.add(value);
+		}
+		return list;
+	}
+	
+	
+	
+
+	@PostMapping("/iudFDrequisition")
+	public String iudFDrequisition(@RequestParam int fundreqGid, String pgID, String blockofficerID, String bussplanID,
+			String fundreqID, BigDecimal totfundreqAmount, String reviewertypeCode, int clfblockID, String reviewerCode,
+			String fundreqRemark, Date lastactionDate, String statusCode, String langCode, String userCode,
+			String modeFlag, String rowTimestamp, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+
+		try {
+			fundRequisitionCommonModel = new FundRequisition_Common_Model();
+			fundRequisitionCommonModel._data = objFundReqService.iudFDrequisition(fundreqGid, pgID, blockofficerID,
+					bussplanID, fundreqID, totfundreqAmount, reviewertypeCode, clfblockID, reviewerCode, fundreqRemark,
+					lastactionDate, statusCode, langCode, userCode, modeFlag, rowTimestamp, succMsg);
+			json = new Gson().toJson(fundRequisitionCommonModel._data);
+
+			return json;
+		}
+
+		catch (SQLException e) {
+			logger.error(e.getMessage());
+			ArrayList<FundRequisition_Common_Model> fundReqCommonmodelList = new ArrayList<FundRequisition_Common_Model>();
+			fundRequisitionCommonModel.reult = e.getMessage();
+			fundRequisitionCommonModel.errorStatus = "1";
+			fundReqCommonmodelList.add(fundRequisitionCommonModel);
+
+			json = new Gson().toJson(fundReqCommonmodelList);
+			return json;
+		}
+	}
+
+}

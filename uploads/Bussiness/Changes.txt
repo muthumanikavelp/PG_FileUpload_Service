@@ -1,0 +1,3042 @@
+diff --git a/NRLM/pom.xml b/NRLM/pom.xml
+index 97215df..9f5bfe9 100644
+--- a/NRLM/pom.xml
++++ b/NRLM/pom.xml
+@@ -5,7 +5,7 @@
+ 	<parent>
+ 		<groupId>org.springframework.boot</groupId>
+ 		<artifactId>spring-boot-starter-parent</artifactId>
+-		<version>2.5.8</version>
++		<version>2.6.1</version>
+ 		<relativePath/> <!-- lookup parent from repository -->
+ 	</parent>
+ 	<groupId>com.example</groupId>
+@@ -69,7 +69,7 @@
+ 			<artifactId>spring-boot-starter-test</artifactId>
+ 			<scope>test</scope>
+ 		</dependency>-->
+-		<dependency>
++		  <dependency>
+ 			<groupId>org.springframework.boot</groupId>
+ 			<artifactId>spring-boot-starter-security</artifactId>
+ 		</dependency>
+@@ -78,19 +78,20 @@
+ 			<artifactId>jjwt</artifactId>
+ 			<version>0.9.1</version>
+ 		</dependency>
+-		<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
++		<!--   https://mvnrepository.com/artifact/io.springfox/springfox-swagger2 -->
+ 		<dependency>
+ 			<groupId>io.springfox</groupId>
+ 			<artifactId>springfox-swagger2</artifactId>
+ 			<version>2.9.2</version>
+ 		</dependency>
+-		<!-- https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui -->
++		<!--   https://mvnrepository.com/artifact/io.springfox/springfox-swagger-ui-->
+ 		<dependency>
+ 			<groupId>io.springfox</groupId>
+ 			<artifactId>springfox-swagger-ui</artifactId>
+ 			<version>2.9.2</version>
+ 		</dependency>
+ 
++
+ 	</dependencies>
+ 
+ 	<build>
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Common_Function.java b/NRLM/src/main/java/NRLM/Web/Api/Common_Function.java
+new file mode 100644
+index 0000000..673fd1e
+--- /dev/null
++++ b/NRLM/src/main/java/NRLM/Web/Api/Common_Function.java
+@@ -0,0 +1,49 @@
++package NRLM.Web.Api;
++
++import java.util.ArrayList;
++import java.util.HashMap;
++import java.util.Iterator;
++import java.util.List;
++import java.util.Map;
++
++import org.json.JSONArray;
++import org.json.JSONException;
++import org.json.JSONObject;
++
++public class Common_Function {
++	public Map<String, Object> toMap(JSONObject object) throws JSONException {
++		Map<String, Object> map = new HashMap<String, Object>();
++
++		Iterator<String> keysItr = object.keys();
++		while (keysItr.hasNext()) {
++			String key = keysItr.next();
++			Object value = object.get(key);
++
++			if (value instanceof JSONArray) {
++				value = toList((JSONArray) value);
++			}
++
++			else if (value instanceof JSONObject) {
++				value = toMap((JSONObject) value);
++			}
++			map.put(key, value);
++		}
++		return map;
++	}
++	public List<Object> toList(JSONArray array) throws JSONException {
++		List<Object> list = new ArrayList<Object>();
++		for (int i = 0; i < array.length(); i++) {
++			Object value = array.get(i);
++			if (value instanceof JSONArray) {
++				value = toList((JSONArray) value);
++			}
++
++			else if (value instanceof JSONObject) {
++				value = toMap((JSONObject) value);
++			}
++			list.add(value);
++		}
++		return list;
++	}
++
++}
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/ProductMaster_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/ProductMaster_Controller.java
+index 24dd150..8bdeaee 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/ProductMaster_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/ProductMaster_Controller.java
+@@ -21,6 +21,8 @@
+ import org.springframework.web.multipart.MultipartFile;
+ 
+ import com.google.gson.Gson;
++
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.Admin.Model.Admin_Common_Model;
+ import NRLM.Web.Api.Admin.Service.ProductMaster_Service;
+ import NRLM.Web.Api.Admin.Service.Role_Service;
+@@ -32,40 +34,8 @@
+ 	ProductMaster_Service objproserv = new ProductMaster_Service();
+ 	Admin_Common_Model Objcommodel;
+ 	String json="";
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
++	Common_Function Objcomm;
++	
+ 	//ProductMaster
+ 	
+ 		@PostMapping("/iudProductmst")
+@@ -73,7 +43,6 @@
+ 				String prodFarmFlag, String prodTypeCode, String prodCategoryCode, String prodSubcategoryCode, String prodUomCode, String prodImage,
+ 				String statusCode, String langCode,String userCode,String modeFlag,String rowTimestamp,String succMsg ,Role_Service role_serv)
+ 				throws ClassNotFoundException, java.sql.SQLException {
+-			logger.info("filesaved");
+ 			try {
+ 				Objcommodel = new Admin_Common_Model();
+ 				Objcommodel._data = objproserv.iudProductmst(file, gid, prodCode, prodDesc, prodFarmFlag,
+@@ -92,6 +61,7 @@
+ 				return json;
+ 			}
+ 		}
++		//ProductTrans
+ 	@PostMapping("/iudProtrans")
+ 	public  String iudProtrans(@RequestParam int  gId,String prodCode,String prodlangCode,String prodDesc,String langCode,String userCode,String modeFlag,String succMsg) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+@@ -114,11 +84,11 @@
+ 		return json;
+ 		}
+ 	}
+-	@PostMapping("/iudprodprice")
++	@PostMapping("/iudProdprice")
+ 	public  String iudprodprice(@RequestParam int  gId,String prodCode,int prodState,String prodGradeCode,BigDecimal prodMspPrice,BigDecimal procurementPrice,String langCode,String userCode,String modeFlag, String succMsg) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			Objcommodel = new Admin_Common_Model();
+-			Objcommodel._data = objproserv.iudprodprice(gId,prodCode,prodState,prodGradeCode,prodMspPrice,procurementPrice,langCode,userCode,modeFlag,succMsg);
++			Objcommodel._data = objproserv.iudProdprice(gId,prodCode,prodState,prodGradeCode,prodMspPrice,procurementPrice,langCode,userCode,modeFlag,succMsg);
+ 			json = new Gson().toJson(Objcommodel._data);
+ 
+ 			return json;
+@@ -137,25 +107,26 @@
+ 		}
+ 	}
+ 	
+-	@PostMapping("/getproductdtl")
+-	public ArrayList<List<Object>> getproductdtl(@RequestParam String productCode, @RequestParam String langCode)
++	@PostMapping("/getProductdtl")
++	public ArrayList<List<Object>> getProductdtl(@RequestParam String productCode, @RequestParam String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_product = new JSONArray();
+ 			JSONArray rs_language = new JSONArray();
+ 			JSONArray rs_price = new JSONArray();
+ 			JSONArray rs_quality = new JSONArray();
+ 
+-			rs_product = objproserv.getproductdtl(productCode, langCode, 3);
+-			rs_language = objproserv.getproductdtl(productCode, langCode, 4);
+-			rs_price = objproserv.getproductdtl(productCode, langCode, 5);
+-			rs_quality = objproserv.getproductdtl(productCode, langCode, 6);
++			rs_product = objproserv.getProductdtl(productCode, langCode, 3);
++			rs_language = objproserv.getProductdtl(productCode, langCode, 4);
++			rs_price = objproserv.getProductdtl(productCode, langCode, 5);
++			rs_quality = objproserv.getProductdtl(productCode, langCode, 6);
+ 
+-			combined.add(toList(rs_product));
+-			combined.add(toList(rs_language));
+-			combined.add(toList(rs_price));
+-			combined.add(toList(rs_quality));
++			combined.add(Objcomm.toList(rs_product));
++			combined.add(Objcomm.toList(rs_language));
++			combined.add(Objcomm.toList(rs_price));
++			combined.add(Objcomm.toList(rs_quality));
+ 
+ 			return combined;
+ 
+@@ -165,15 +136,16 @@
+ 		}
+ 
+ }
+-	@PostMapping("/getproductList")
++	@PostMapping("/getProductlist")
+ 	public ArrayList<List<Object>> getproductList(@RequestParam String userCode, @RequestParam String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_productlist = new JSONArray();
+-			rs_productlist = objproserv.getproductList(userCode, langCode, 3);
++			rs_productlist = objproserv.getProductlist(userCode, langCode, 3);
+ 
+-			combined.add(toList(rs_productlist));
++			combined.add(Objcomm.toList(rs_productlist));
+ 
+ 			return combined;
+ 
+@@ -183,15 +155,16 @@
+ 		}
+ 
+ 	}
+-	@PostMapping("/getlocallanglist")
++	@PostMapping("/getLocallanglist")
+ 	public ArrayList<List<Object>> getlocallanglist()
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_lang = new JSONArray();
+ 			rs_lang = objproserv.getlocallanglist(1);
+ 
+-			combined.add(toList(rs_lang));
++			combined.add(Objcomm.toList(rs_lang));
+ 
+ 			return combined;
+ 
+@@ -201,14 +174,14 @@
+ 		}
+ 
+ 	}
+-	@PostMapping("/iudProdQuality")
+-	public String iudProdQuality(@RequestParam int prodqltygID, String prodCode, String prodQltyparamCode,
++	@PostMapping("/iudProdquality")
++	public String iudProdquality(@RequestParam int prodqltygID, String prodCode, String prodQltyparamCode,
+ 			BigDecimal prodRangeFrom, BigDecimal prodRangeTo, String prodRangeFlag, String prodQltyuomCode,
+ 			BigDecimal prodThresholdValue, String langCode, String userCode, String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 
+ 		try {
+ 			Objcommodel = new Admin_Common_Model();
+-			Objcommodel._data = objproserv.iudProdQuality(prodqltygID, prodCode, prodQltyparamCode, prodRangeFrom, prodRangeTo,
++			Objcommodel._data = objproserv.iudProdquality(prodqltygID, prodCode, prodQltyparamCode, prodRangeFrom, prodRangeTo,
+ 					prodRangeFlag, prodQltyuomCode, prodThresholdValue, langCode, userCode, modeFlag,succMsg);
+ 			json = new Gson().toJson(Objcommodel._data);
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Role_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Role_Controller.java
+index 68bcb1d..e7bc622 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Role_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Role_Controller.java
+@@ -21,6 +21,7 @@
+ 
+ import com.google.gson.Gson;
+ 
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.Admin.Model.Admin_Common_Model;
+ import NRLM.Web.Api.Admin.Model.RoleMenuRights_Model;
+ import NRLM.Web.Api.Admin.Model.RoleMenulist_Model;
+@@ -38,47 +39,15 @@
+ 	Role_Service objRoleService = new Role_Service();
+ 	Admin_Common_Model Objcommodel;
+ 	String json="";
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
++	Common_Function Objcomm;
+ 
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
+-
+-	@PostMapping("/GetRoleList")
+-	public  List<Rolelist_Model>GetRoleList(@RequestParam String langCode) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/getRolelist")
++	public  List<Rolelist_Model>GetRolelist(@RequestParam String langCode) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
++			Objcomm = new Common_Function();
+ 			Rolelist_Model ObjRole = new Rolelist_Model();
+ 			List<Rolelist_Model> objRolelist = new ArrayList<Rolelist_Model>();
+-			objRolelist = objRoleService.GetRoleList(langCode);
++			objRolelist = objRoleService.getRolelist(langCode);
+ 			return objRolelist;
+ 
+ 		} catch (ClassNotFoundException e) {
+@@ -87,12 +56,13 @@
+ 		}
+ 		}
+ 
+-	@PostMapping("/GetRolemenuList")
+-	public  List<RoleMenulist_Model>GetRolemenuList (@RequestParam String langCode) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/getRolemenulist")
++	public  List<RoleMenulist_Model>getRolemenulist (@RequestParam String langCode) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
++			Objcomm = new Common_Function();
+ 			RoleMenulist_Model ObjRoleMenu = new RoleMenulist_Model();
+ 			List<RoleMenulist_Model> objRoleMenulist = new ArrayList<RoleMenulist_Model>();
+-			objRoleMenulist = objRoleService.GetRolemenuList(langCode);
++			objRoleMenulist = objRoleService.getRolemenulist(langCode);
+ 			return objRoleMenulist;
+ 
+ 		} catch (ClassNotFoundException e) {
+@@ -101,14 +71,15 @@
+ 		}
+ 	}
+ 	
+-	@PostMapping("/GetRole")
+-	public ArrayList<List<Object>> GetRole(@RequestParam String roleCode ,String langCode) throws NoSuchElementException, java.sql.SQLException {
++	@PostMapping("/getRole")
++	public ArrayList<List<Object>>getRole(@RequestParam String roleCode ,String langCode) throws NoSuchElementException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			 List<JSONArray> resultArray = null;
+ 			JSONArray rs_rlfetch = new JSONArray(); /// 1)Single
+-	        rs_rlfetch = objRoleService.GetRole(roleCode, langCode, 3); /// 2)single
+-			combined.add(toList(rs_rlfetch)); /// 3)single
++	        rs_rlfetch = objRoleService.getRole(roleCode, langCode, 3); /// 2)single
++			combined.add(Objcomm.toList(rs_rlfetch)); /// 3)single
+ 			return combined;
+ 
+ 		} catch (NoSuchElementException e) {
+@@ -120,6 +91,7 @@
+ 	@PostMapping("/insRolemenurights")
+ 	public  String insRolemenurights(@RequestBody RoleMenuRights_Model objrmr) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
++			
+ 			Objcommodel = new Admin_Common_Model();
+ 			Objcommodel._data = objRoleService.insRolemenurights(objrmr);
+ 			json = new Gson().toJson(Objcommodel._data);
+@@ -165,13 +137,13 @@
+ 			return json;
+ 		}
+ 	}
+-	@PostMapping("/iudMasterTrans")
++	@PostMapping("/iudMastertrans")
+ 	public String iudMasterTrans(@RequestParam int mastertranslateGid, String parentCode, String masterCode, String masterDesc,
+ 			String langCode, String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 
+ 		try {
+ 			Objcommodel = new Admin_Common_Model();
+-			Objcommodel._data = objRoleService.iudMasterTrans(mastertranslateGid, parentCode, masterCode, masterDesc,
++			Objcommodel._data = objRoleService.iudMastertrans(mastertranslateGid, parentCode, masterCode, masterDesc,
+ 					langCode, modeFlag, succMsg);
+ 			json = new Gson().toJson(Objcommodel._data);
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Screendata_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Screendata_Controller.java
+index 6cab923..353df71 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Screendata_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/Controller/Screendata_Controller.java
+@@ -19,6 +19,8 @@
+ import org.springframework.web.bind.annotation.RestController;
+ import com.fasterxml.jackson.annotation.JsonIgnore;
+ import com.fasterxml.jackson.annotation.JsonProperty;
++
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.Admin.Model.*;
+ import NRLM.Web.Api.Admin.Service.*;
+ import lombok.NonNull;
+@@ -29,61 +31,19 @@
+ public class Screendata_Controller {
+ 	Logger logger = LoggerFactory.getLogger(Screendata_Controller.class);
+ 	Screendata_Service objService = new Screendata_Service();
+-	@NonNull
+-	@Column(columnDefinition = "TEXT")
+-	@JsonIgnore
+-	private JSONObject jsonData;
+-
+-	@JsonProperty("jsonData")
+-	public Map<String, Object> getAsJsonString() throws IOException, JSONException {
+-		return toMap(jsonData);
+-	}
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
++	Common_Function Objcomm;
+ 
+ 
+-	@PostMapping("/Getscreendata")
++	@PostMapping("/getscreendata")
+ 	public List<Screendata_Model> GetScreendata(@RequestParam String screenCode, @RequestParam String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			Screendata_Model ObjScreendata = new Screendata_Model();
+ 			ObjScreendata.set_screen_code(screenCode);
+ 			ObjScreendata.set_lang_code(langCode);
+ 			List<Screendata_Model> screendata_list = new ArrayList<Screendata_Model>();
+-			screendata_list = objService.GetScreendata(ObjScreendata);
++			screendata_list = objService.getscreendata(ObjScreendata);
+ 			return screendata_list;
+ 
+ 		} catch (ClassNotFoundException e) {
+@@ -93,13 +53,14 @@
+ 
+ 	}
+ 	
+-	@PostMapping("/GetLanguages")
++	@PostMapping("/getLanguages")
+ 	public List<Language_Model> GetLanguages()
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			Language_Model ObjLangdata = new Language_Model();
+ 			List<Language_Model> objLanglist = new ArrayList<Language_Model>();
+-			objLanglist = objService.GetLanguages();
++			objLanglist = objService.getLanguages();
+ 			return objLanglist;
+ 
+ 		} catch (ClassNotFoundException e) {
+@@ -109,14 +70,31 @@
+ 
+ 	}
+ 
+-	@PostMapping("/GetMasterdesc")
+-	public ArrayList<List<Object>> GetMasterdesc( @RequestParam String parentCode,String dependCode, String langCode )
++	@PostMapping("/getMasterdesc")
++	public ArrayList<List<Object>> getMasterdesc( @RequestParam String parentCode,String dependCode, String langCode )
+ 			throws  java.sql.SQLException, ClassNotFoundException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray _result_fetchmstdesc = new JSONArray(); 
+-			_result_fetchmstdesc = objService.GetMasterdesc( parentCode,dependCode,langCode, 4);
+-			combined.add(toList(_result_fetchmstdesc));
++			_result_fetchmstdesc = objService.getMasterdesc( parentCode,dependCode,langCode, 4);
++			combined.add(Objcomm.toList(_result_fetchmstdesc));
++			return combined;
++		} catch (NoSuchElementException e) {
++			logger.error(e.getMessage());
++			throw new NoSuchElementException(e.getMessage());
++		}
++	}
++	//MasterList
++	@PostMapping("/getMasterlist")
++	public ArrayList<List<Object>> getMasterlist( @RequestParam String parentCode,String langCode )
++			throws  java.sql.SQLException, ClassNotFoundException {
++		try {
++			Objcomm = new Common_Function();
++			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
++			JSONArray rs_resultone = new JSONArray(); 
++			rs_resultone = objService.getMasterlist( parentCode,langCode,3);
++			combined.add(Objcomm.toList(rs_resultone));
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+ 			logger.error(e.getMessage());
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_DAO.java
+index 088bdeb..61c5433 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_DAO.java
+@@ -92,7 +92,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudprodprice(int gId, String prodCode, int prodState, String prodGradeCode, BigDecimal prodMspPrice,
++	public ResultSet iudProdprice(int gId, String prodCode, int prodState, String prodGradeCode, BigDecimal prodMspPrice,
+ 			BigDecimal procurementPrice, String langCode, String userCode, String modeFlag, String succMsg) throws ClassNotFoundException,java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+@@ -127,7 +127,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet getproductdtl(String productCode, String langCode, int refcursor)throws ClassNotFoundException, java.sql.SQLException  {
++	public ResultSet getProductdtl(String productCode, String langCode, int refcursor)throws ClassNotFoundException, java.sql.SQLException  {
+ 				
+ 			Connection conn = CommonConfiguration.getInstance().connect();
+ 			try {
+@@ -156,7 +156,7 @@
+ 	
+ }
+ 
+-	public ResultSet getproductList(String userCode, String langCode, int refcursor)throws ClassNotFoundException, java.sql.SQLException {
++	public ResultSet getProductlist(String userCode, String langCode, int refcursor)throws ClassNotFoundException, java.sql.SQLException {
+ 			Connection conn = CommonConfiguration.getInstance().connect();
+ 			try {
+ 				java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_productlist(?,?,?)}");
+@@ -204,7 +204,7 @@
+ 	}
+ 
+ 
+-	public ResultSet iudProdQuality(int prodqltygID, String prodCode, String prodQltyparamCode,
++	public ResultSet iudProdquality(int prodqltygID, String prodCode, String prodQltyparamCode,
+ 			BigDecimal prodRangeFrom, BigDecimal prodRangeTo, String prodRangeFlag, String prodQltyuomCode,
+ 			BigDecimal prodThresholdValue, String langCode, String userCode, String modeFlag, String succMsg) 
+ 				throws ClassNotFoundException, java.sql.SQLException {
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_Interface.java
+index 0fde053..fc74bb6 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/ProductMaster_Interface.java
+@@ -14,12 +14,12 @@
+ 			String succMsg,Role_Service role_serv) throws ClassNotFoundException, java.sql.SQLException;
+ 	public ResultSet iudProtrans(int gId, String prodCode, String prodlangCode, String prodDesc, String langCode,
+ 			String userCode, String modeFlag, String succMsg)throws ClassNotFoundException,java.sql.SQLException ;
+-	public ResultSet iudprodprice(int gId, String prodCode, String prodState, String prodGradeCode, BigDecimal prodMspPrice,
++	public ResultSet iudProdprice(int gId, String prodCode, String prodState, String prodGradeCode, BigDecimal prodMspPrice,
+ 			BigDecimal procurementPrice, String langCode, String userCode, String modeFlag, String succMsg) throws ClassNotFoundException,java.sql.SQLException ;
+-	public ResultSet getproductdtl(String productCode, String langCode, int refcursor)throws ClassNotFoundException;
+-	public ResultSet getproductList(String userCode, String langCode, int refcursor)throws ClassNotFoundException, java.sql.SQLException;
++	public ResultSet getProductdtl(String productCode, String langCode, int refcursor)throws ClassNotFoundException;
++	public ResultSet getProductlist(String userCode, String langCode, int refcursor)throws ClassNotFoundException, java.sql.SQLException;
+ 	public ResultSet getlocallanglist( int refcursor)throws ClassNotFoundException, java.sql.SQLException;
+-	public ResultSet iudProdQuality(int prodqltygID, String prodCode, String prodQltyparamCode,
++	public ResultSet iudProdquality(int prodqltygID, String prodCode, String prodQltyparamCode,
+ 			BigDecimal prodRangeFrom, BigDecimal prodRangeTo, String prodRangeFlag, String prodQltyuomCode,
+ 			BigDecimal prodThresholdValue, String langCode, String userCode, String modeFlag, String succMsg) 
+ 				throws ClassNotFoundException, java.sql.SQLException ;
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_DAO.java
+index 1d86fc0..409ecda 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_DAO.java
+@@ -16,7 +16,7 @@
+ 
+ public class Role_DAO implements Role_Interface {
+ 	
+-	public ResultSet GetRoleList(String langCode)  throws ClassNotFoundException, java.sql.SQLException {
++	public ResultSet getRolelist(String langCode)  throws ClassNotFoundException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		try {
+ 		conn.setAutoCommit(false);
+@@ -34,7 +34,7 @@
+ 			throw e;
+ 		}
+ 	}
+-	public ResultSet GetRolemenuList(String langCode) throws ClassNotFoundException, java.sql.SQLException {
++	public ResultSet getRolemenulist(String langCode) throws ClassNotFoundException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -55,7 +55,7 @@
+ 			
+ 		}
+ 	//code start
+-	public ResultSet GetRole(String roleCode,String langCode, int refCursor)
++	public ResultSet getRole(String roleCode,String langCode, int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		CallableStatement callableStatement = conn
+@@ -152,7 +152,7 @@
+ 			throw ex;
+ 		}
+ 	}
+-	public ResultSet iudMasterTrans(int mastertranslateGid, String parentCode, String masterCode, String masterDesc,
++	public ResultSet iudMastertrans(int mastertranslateGid, String parentCode, String masterCode, String masterDesc,
+ 			String langCode, String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		conn.setAutoCommit(false);
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_Interface.java
+index 3cb6b52..f31cabb 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Role_Interface.java
+@@ -10,15 +10,15 @@
+ 
+ public interface Role_Interface {
+ 
+-	public ResultSet GetRoleList(String langCode)  throws ClassNotFoundException, java.sql.SQLException ;
+-    public ResultSet GetRolemenuList(String langCode) throws ClassNotFoundException, java.sql.SQLException;
+-	public ResultSet GetRole(String roleCode,String langCode, int refCursor)
++	public ResultSet getRolelist(String langCode)  throws ClassNotFoundException, java.sql.SQLException ;
++    public ResultSet getRolemenulist(String langCode) throws ClassNotFoundException, java.sql.SQLException;
++	public ResultSet getRole(String roleCode,String langCode, int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException;
+ 	public ResultSet insRolemenurights(RoleMenuRights_Model objrmr) throws ClassNotFoundException,java.sql.SQLException;
+ 	public ResultSet iudMaster(int masterGid, String parentCode, String masterCode, String dependParentCode,
+ 			String dependCode, int recSlno, String sysFlag, String statusCode, String langCode, String userCode,
+ 			String modeFlag, String rowTimestamp, String succMsg) throws ClassNotFoundException, java.sql.SQLException ;
+-	public ResultSet iudMasterTrans(int mastertranslateGid, String parentCode, String masterCode, String masterDesc,
++	public ResultSet iudMastertrans(int mastertranslateGid, String parentCode, String masterCode, String masterDesc,
+ 			String langCode, String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException;
+ 
+ }
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_DAO.java
+index 49514cc..b74804c 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_DAO.java
+@@ -10,7 +10,7 @@
+ 
+ public class Screendata_DAO implements Screendata_Interface {
+ 
+-	public ResultSet GetScreendata(Screendata_Model ObjScreendata) throws ClassNotFoundException, java.sql.SQLException {
++	public ResultSet getscreendata(Screendata_Model ObjScreendata) throws ClassNotFoundException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -31,7 +31,7 @@
+ 		}
+ 	}
+ 	
+-	public ResultSet GetLanguages() throws ClassNotFoundException, java.sql.SQLException {
++	public ResultSet getLanguages() throws ClassNotFoundException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -49,7 +49,7 @@
+ 			throw e;
+ 		}
+ 	}
+-	public ResultSet GetMasterdesc(String parentCode, String dependCode,String langCode, int refCursor)
++	public ResultSet getMasterdesc(String parentCode, String dependCode,String langCode, int refCursor)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_fetch_masterdependdescription(?,?,?,?)}");
+@@ -71,6 +71,29 @@
+ 	
+ 
+ }
++	public ResultSet getMasterlist(String parentCode, String langCode, int refCursor)
++			throws ClassNotFoundException, java.sql.SQLException {
++		Connection conn = CommonConfiguration.getInstance().connect();
++		java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_masterlist(?,?,?)}");
++		conn.setAutoCommit(false);
++		try {
++		callableStatement.setString(1, parentCode);
++		callableStatement.setString(2, langCode);
++		callableStatement.registerOutParameter(3, java.sql.Types.REF_CURSOR);
++		callableStatement.execute();
++		ResultSet rs = (ResultSet) callableStatement.getObject(refCursor);
++		conn.commit();
++		return rs;
++
++	}
++		catch(SQLException e) {
++			throw e;
++		}
++	
++
++}
++}
++	
+ 
+ 	
+-}
++
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_Interface.java
+index e94b2ac..4a42640 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/DAO/Screendata_Interface.java
+@@ -7,11 +7,11 @@
+ import NRLM.Web.Api.Admin.Model.*;
+ 
+ public interface Screendata_Interface {
+-	public  ResultSet GetScreendata(Screendata_Model ObjScreendata) throws ClassNotFoundException, SQLException;
+-	public  ResultSet GetLanguages() throws ClassNotFoundException, SQLException;
+-//	public ResultSet GetMasterdesc(String parentCode,String langCode, int refCursor)
+-//			throws ClassNotFoundException, java.sql.SQLException;
+-	public ResultSet GetMasterdesc(String parentCode, String dependCode,String langCode, int refCursor)
++	public  ResultSet getscreendata(Screendata_Model ObjScreendata) throws ClassNotFoundException, SQLException;
++	public  ResultSet getLanguages() throws ClassNotFoundException, SQLException;
++	public ResultSet getMasterdesc(String parentCode, String dependCode,String langCode, int refCursor)
+ 			throws ClassNotFoundException, java.sql.SQLException;
++	public ResultSet getMasterlist(String parentCode, String langCode, int refCursor)
++			throws ClassNotFoundException, java.sql.SQLException ;
+ 
+ }
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/ProductMaster_Service.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/ProductMaster_Service.java
+index 825f855..945be0a 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/ProductMaster_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/ProductMaster_Service.java
+@@ -105,11 +105,11 @@
+ 	}
+ 
+ 
+-	public JSONArray iudprodprice(int gId, String prodCode, int prodState, String prodGradeCode, BigDecimal prodMspPrice,
++	public JSONArray iudProdprice(int gId, String prodCode, int prodState, String prodGradeCode, BigDecimal prodMspPrice,
+ 			BigDecimal procurementPrice, String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException,java.sql.SQLException {
+ 		
+ 				try {
+-				ResultSet proprice_rs = objprodao.iudprodprice(gId,prodCode,prodState,prodGradeCode,prodMspPrice,procurementPrice,langCode,userCode,modeFlag,succMsg);
++				ResultSet proprice_rs = objprodao.iudProdprice(gId,prodCode,prodState,prodGradeCode,prodMspPrice,procurementPrice,langCode,userCode,modeFlag,succMsg);
+ 				JSONArray json = new JSONArray();
+ 
+ 				ResultSetMetaData rsmd = ((ResultSet) proprice_rs).getMetaData();
+@@ -133,10 +133,10 @@
+ 				}
+ 	}
+ 
+-	public JSONArray getproductdtl(String productCode, String langCode, int refcursor) 
++	public JSONArray getProductdtl(String productCode, String langCode, int refcursor) 
+ 				throws ClassNotFoundException, java.sql.SQLException {
+ 			try {
+-				ResultSet prodtl_rs = objprodao.getproductdtl(productCode, langCode, refcursor);
++				ResultSet prodtl_rs = objprodao.getProductdtl(productCode, langCode, refcursor);
+ 
+ 				JSONArray json = new JSONArray();
+ 
+@@ -161,10 +161,10 @@
+ 			}
+ 	}
+ 
+-	public JSONArray getproductList(String userCode, String langCode, int refcursor) throws ClassNotFoundException, java.sql.SQLException {
++	public JSONArray getProductlist(String userCode, String langCode, int refcursor) throws ClassNotFoundException, java.sql.SQLException {
+ 				
+ 			try {
+-				ResultSet promst_rs = objprodao.getproductList(userCode, langCode, refcursor);
++				ResultSet promst_rs = objprodao.getProductlist(userCode, langCode, refcursor);
+ 
+ 				JSONArray json = new JSONArray();
+ 
+@@ -222,13 +222,13 @@
+ 
+ }
+ 
+-	public JSONArray iudProdQuality(int prodqltygID, String prodCode, String prodQltyparamCode,
++	public JSONArray iudProdquality(int prodqltygID, String prodCode, String prodQltyparamCode,
+ 			BigDecimal prodRangeFrom, BigDecimal prodRangeTo, String prodRangeFlag, String prodQltyuomCode,
+ 			BigDecimal prodThresholdValue, String langCode, String userCode, String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 			try {
+ 
+ 			
+-				ResultSet proqua_rs = objprodao.iudProdQuality(prodqltygID, prodCode, prodQltyparamCode, prodRangeFrom, prodRangeTo,
++				ResultSet proqua_rs = objprodao.iudProdquality(prodqltygID, prodCode, prodQltyparamCode, prodRangeFrom, prodRangeTo,
+ 						prodRangeFlag, prodQltyuomCode, prodThresholdValue, langCode, userCode, modeFlag,succMsg);
+ 
+ 				JSONArray json = new JSONArray();
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Role_Service.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Role_Service.java
+index 7bf2bd7..ffed26d 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Role_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Role_Service.java
+@@ -39,10 +39,10 @@
+ 		this.uploadDir = uploadDir;
+ 	}
+ 	
+-	public List<Rolelist_Model> GetRoleList(String langCode)throws ClassNotFoundException, java.sql.SQLException {
++	public List<Rolelist_Model> getRolelist(String langCode)throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<Rolelist_Model> objRolelist = new ArrayList<Rolelist_Model>();
+-		ResultSet Role_rs = Objroledao.GetRoleList(langCode);
++		ResultSet Role_rs = Objroledao.getRolelist(langCode);
+ 		while(Role_rs.next()) {
+ 			Rolelist_Model objRoledata = new Rolelist_Model();
+ 			objRoledata.setRole_gid(Role_rs.getInt(1));
+@@ -60,11 +60,11 @@
+ 		}
+ 	}
+ 
+-	public List<RoleMenulist_Model> GetRolemenuList(String langCode) throws ClassNotFoundException,java.sql.SQLException {
++	public List<RoleMenulist_Model> getRolemenulist(String langCode) throws ClassNotFoundException,java.sql.SQLException {
+ 		try {
+ 	
+ 		List<RoleMenulist_Model> objRoleMenulist = new ArrayList<RoleMenulist_Model>();
+-		ResultSet RoleMenu_rs = Objroledao.GetRolemenuList(langCode);
++		ResultSet RoleMenu_rs = Objroledao.getRolemenulist(langCode);
+ 		while(RoleMenu_rs.next()) {
+ 			RoleMenulist_Model objRoleMenudata = new RoleMenulist_Model();
+ 			objRoleMenudata.setMenu_gid(RoleMenu_rs.getInt("Menu_gid"));
+@@ -92,11 +92,11 @@
+ 		}
+ 	}
+ 
+-	public JSONArray GetRole(String roleCode, String langCode, int refCursor)
++	public JSONArray getRole(String roleCode, String langCode, int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ 		
+      try {
+-		ResultSet fetchrole_rs = Objroledao.GetRole(roleCode, langCode, refCursor);
++		ResultSet fetchrole_rs = Objroledao.getRole(roleCode, langCode, refCursor);
+ 
+ 		JSONArray json = new JSONArray();
+ 
+@@ -176,12 +176,12 @@
+ 
+ 	}
+ 
+-	public JSONArray iudMasterTrans(int mastertranslateGid, String parentCode, String masterCode, String masterDesc,
++	public JSONArray iudMastertrans(int mastertranslateGid, String parentCode, String masterCode, String masterDesc,
+ 			String langCode, String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 
+ 		
+-			ResultSet masterTrans_rs = Objroledao.iudMasterTrans(mastertranslateGid, parentCode, masterCode, masterDesc, langCode,
++			ResultSet masterTrans_rs = Objroledao.iudMastertrans(mastertranslateGid, parentCode, masterCode, masterDesc, langCode,
+ 					modeFlag, succMsg);
+ 
+ 			JSONArray json = new JSONArray();
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Screendata_Service.java b/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Screendata_Service.java
+index 9ca0d63..6513a50 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Screendata_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/Admin/Service/Screendata_Service.java
+@@ -2,6 +2,7 @@
+ 
+ import java.sql.ResultSet;
+ import java.sql.ResultSetMetaData;
++import java.sql.SQLException;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.NoSuchElementException;
+@@ -16,9 +17,9 @@
+ 
+ 	Screendata_DAO objDaomst = new Screendata_DAO();
+ 
+-	public List<Screendata_Model> GetScreendata(Screendata_Model ObjScreendata) throws ClassNotFoundException, java.sql.SQLException {
++	public List<Screendata_Model> getscreendata(Screendata_Model ObjScreendata) throws ClassNotFoundException, java.sql.SQLException {
+ 		List<Screendata_Model> Screendata_list = new ArrayList<Screendata_Model>();
+-		ResultSet screendata_rs = objDaomst.GetScreendata(ObjScreendata);
++		ResultSet screendata_rs = objDaomst.getscreendata(ObjScreendata);
+ 		while (screendata_rs.next()) {
+ 			Screendata_Model Objscreendata = new Screendata_Model();
+ 			Objscreendata.setScreendata_gid(screendata_rs.getInt("screendata_gid"));
+@@ -40,9 +41,9 @@
+ 		return Screendata_list;
+ 	}
+ 	
+-	public List<Language_Model> GetLanguages() throws ClassNotFoundException, java.sql.SQLException {
++	public List<Language_Model> getLanguages() throws ClassNotFoundException, java.sql.SQLException {
+ 		List<Language_Model> objLanglist = new ArrayList<Language_Model>();
+-		ResultSet Lang_rs = objDaomst.GetLanguages();
++		ResultSet Lang_rs = objDaomst.getLanguages();
+ 		while (Lang_rs.next()) {
+ 			Language_Model objLangdata = new Language_Model();
+ 			objLangdata.setLang_gid(Lang_rs.getInt(1));
+@@ -55,10 +56,10 @@
+ 		return objLanglist;
+ 	}
+ 	
+-	public JSONArray GetMasterdesc(String parentCode, String dependCode,String langCode, int refCursor)
++	public JSONArray getMasterdesc(String parentCode, String dependCode,String langCode, int refCursor)
+ 			throws  java.sql.SQLException, ClassNotFoundException {
+ 
+-		ResultSet masterdesc_rs = objDaomst.GetMasterdesc(parentCode,dependCode, langCode, refCursor);
++		ResultSet masterdesc_rs = objDaomst.getMasterdesc(parentCode,dependCode, langCode, refCursor);
+ 
+ 		JSONArray json = new JSONArray();
+ 
+@@ -75,6 +76,31 @@
+       
+ 		return json;
+ 	}
++	public JSONArray getMasterlist(String parentCode, String langCode, int refCursor) 
++			throws  java.sql.SQLException, ClassNotFoundException {
++try {
++		ResultSet masterlist_rs = objDaomst.getMasterlist(parentCode,langCode, refCursor);
++
++		JSONArray json = new JSONArray();
++
++		ResultSetMetaData rsmd = ((ResultSet) masterlist_rs).getMetaData();
++		while (((ResultSet) masterlist_rs).next()) {
++			int numColumns = rsmd.getColumnCount();
++			JSONObject obj = new JSONObject();
++			for (int i1 = 1; i1 <= numColumns; i1++) {
++				String column_name = rsmd.getColumnName(i1);
++				obj.put(column_name, ((ResultSet) masterlist_rs).getObject(column_name));
++			}
++			json.put(obj);
++		}
++      
++		return json;
++	}
++  catch(SQLException e) {
++throw e;
++}
++
++}
+ }
+ 
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Controller/FundRequisition_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Controller/FundRequisition_Controller.java
+index 84fe9d3..089673e 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Controller/FundRequisition_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Controller/FundRequisition_Controller.java
+@@ -27,6 +27,8 @@
+ import com.fasterxml.jackson.annotation.JsonIgnore;
+ import com.fasterxml.jackson.annotation.JsonProperty;
+ import com.google.gson.Gson;
++
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.FundRequisition.Model.Fund_Common_Model;
+ import NRLM.Web.Api.FundRequisition.Service.FundRequisition_Service;
+ import lombok.NonNull;
+@@ -40,49 +42,8 @@
+ 	FundRequisition_Service objFundService ;
+ 	Fund_Common_Model Objcommodel;
+ 	String json="";
+-	@NonNull
+-	@Column(columnDefinition = "TEXT")
+-	@JsonIgnore
+-	private JSONObject jsonData;
+-	public FundRequisition_Controller(FundRequisition_Service objFundService) {
+-		this.objFundService = objFundService;
+-
+-	}
+-	@JsonProperty("jsonData")
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
++	Common_Function Objcomm;
++	
+ 	@PostMapping("/iudFundreqdtl")
+ 	public  String iudFundreqdtl(@RequestParam int gId,String pgId,String blockofficerId,String bussplanId,String fundreqId,String routingInstCode,String fundreqHeadCode,BigDecimal fundreqAmount,String langCode,String userCode,String modeFlag ,String succMsg) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+@@ -134,12 +95,12 @@
+ 		}
+ 	}
+ 
+-	@PostMapping("/iudfunddisbt")
++	@PostMapping("/iudFunddisbt")
+ 	public String iudfunddisbt(@RequestParam int gId,String pgId,String funddisbId,int trancheNo,BigDecimal trancheAmount,Date trancheDate,String trancheStatusCode,Date receivedDate,String receivedRefNo,String syncStatusCode,String langCode,String userCode,String modeFlag,String succMsg ) throws ClassNotFoundException, java.sql.SQLException {
+ 
+ 		try {
+ 			Objcommodel = new Fund_Common_Model();
+-			Objcommodel._data = objFundService.iudfunddisbt(gId, pgId, funddisbId,
++			Objcommodel._data = objFundService.iudFunddisbt(gId, pgId, funddisbId,
+ 					trancheNo, trancheAmount, trancheDate, trancheStatusCode, receivedDate, receivedRefNo, syncStatusCode,
+ 					langCode, userCode, modeFlag, succMsg);
+ 			json = new Gson().toJson(Objcommodel._data);
+@@ -159,12 +120,12 @@
+ 			return json;
+ 		}
+ 	}
+-	@PostMapping("/iudfunddisb")
+-	public String iudfunddisb(@RequestParam int gId,String pgId,String fundreqId,String funddisbId,String loanAccNo,String routingInstCode,String sourceInstCode ,String funddisbTypeCode,Date sanctionedDate,BigDecimal sanctionedAmount,int interestRate,int repymtTenure,String repymtFreqCode,String collateralTypeCode,BigDecimal collateralAmount, String statusCode,String langCode,String userCode,String modeFlag,String rowTimestamp,String succMsg) throws ClassNotFoundException, java.sql.SQLException {
++	@PostMapping("/iudFunddis")
++	public String iudFunddis(@RequestParam int gId,String pgId,String fundreqId,String funddisbId,String loanAccNo,String routingInstCode,String sourceInstCode ,String funddisbTypeCode,Date sanctionedDate,BigDecimal sanctionedAmount,int interestRate,int repymtTenure,String repymtFreqCode,String collateralTypeCode,BigDecimal collateralAmount, String statusCode,String langCode,String userCode,String modeFlag,String rowTimestamp,String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 
+ 		try {
+ 			Objcommodel = new Fund_Common_Model();
+-			Objcommodel._data = objFundService.iudfunddisb(gId, pgId, fundreqId ,funddisbId,loanAccNo,routingInstCode,sourceInstCode,funddisbTypeCode,sanctionedDate,sanctionedAmount,interestRate,repymtTenure,repymtFreqCode,collateralTypeCode,collateralAmount,statusCode,langCode,userCode,modeFlag,rowTimestamp,succMsg);
++			Objcommodel._data = objFundService.iudFunddis(gId, pgId, fundreqId ,funddisbId,loanAccNo,routingInstCode,sourceInstCode,funddisbTypeCode,sanctionedDate,sanctionedAmount,interestRate,repymtTenure,repymtFreqCode,collateralTypeCode,collateralAmount,statusCode,langCode,userCode,modeFlag,rowTimestamp,succMsg);
+ 			json = new Gson().toJson(Objcommodel._data);
+ 
+ 			return json;
+@@ -186,6 +147,7 @@
+ 	public ArrayList<List<Object>> getFundreq( @RequestParam String pgId,String bussplanId,String fundreqId,String langCode)
+ 			throws NoSuchElementException, java.sql.SQLException, ClassNotFoundException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_funrequisition = new JSONArray(); 
+ 			JSONArray rs_comm = new JSONArray(); 
+@@ -195,9 +157,9 @@
+ 			rs_comm = objFundService.getFundreq(pgId,bussplanId,fundreqId,langCode,6 );
+ 			rs_funrequirements = objFundService.getFundreq(pgId,bussplanId,fundreqId,langCode,7 );
+ 			
+-			combined.add(toList(rs_funrequisition));
+-			combined.add(toList(rs_comm));
+-			combined.add(toList(rs_funrequirements));
++			combined.add(Objcomm.toList(rs_funrequisition));
++			combined.add(Objcomm.toList(rs_comm));
++			combined.add(Objcomm.toList(rs_funrequirements));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (SQLException e) {
+@@ -208,13 +170,14 @@
+ 	public ArrayList<List<Object>> getFundreqlist( @RequestParam String langCode)
+ 			throws NoSuchElementException, java.sql.SQLException, ClassNotFoundException {
+ 		try {
++			Objcomm= new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_frlist = new JSONArray(); 
+ 			
+ 			
+ 			rs_frlist = objFundService.getFundreqlist(langCode,2 );
+ 			
+-			combined.add(toList(rs_frlist));
++			combined.add(Objcomm.toList(rs_frlist));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (SQLException e) {
+@@ -224,10 +187,11 @@
+ 	@PostMapping("/getFddistlist")
+ 	public ArrayList<List<Object>> getFddistlist(String langCode) throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_fdls = new JSONArray();
+ 			rs_fdls = objFundService.getFddistlist(langCode, 2);
+-			combined.add(toList(rs_fdls));
++			combined.add(Objcomm.toList(rs_fdls));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+@@ -235,12 +199,12 @@
+ 			throw new NoSuchElementException(e.getMessage());
+ 		}
+ 	}
+-	@PostMapping("/iudfundrepymt")
++	@PostMapping("/iudFundrepymt")
+ 	public String iudfundrepymt(@RequestParam int gId,String pgId,String loanAccNo,Date pymtDate,String payModeCode,BigDecimal paidAmount,String pymtRefNo,BigDecimal principalAmount,BigDecimal interestAmount,BigDecimal otherAmount,String  pymtRemarks,String statusCode,String langCode,String  userCode, String modeFlag,String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 
+ 		try {
+ 			Objcommodel = new Fund_Common_Model();
+-			Objcommodel._data = objFundService.iudfundrepymt(gId,pgId,loanAccNo,pymtDate,payModeCode,paidAmount,pymtRefNo,principalAmount,interestAmount,otherAmount,pymtRemarks,statusCode,langCode,userCode,modeFlag,succMsg);
++			Objcommodel._data = objFundService.iudFundrepymt(gId,pgId,loanAccNo,pymtDate,payModeCode,paidAmount,pymtRefNo,principalAmount,interestAmount,otherAmount,pymtRemarks,statusCode,langCode,userCode,modeFlag,succMsg);
+ 			json = new Gson().toJson(Objcommodel._data);
+ 
+ 			return json;
+@@ -258,20 +222,21 @@
+ 			return json;
+ 		}
+ 	}
+-	@PostMapping("/getfunddisb")
++	@PostMapping("/getFunddisb")
+ 	public ArrayList<List<Object>> getfunddisb(String pgId, String funddisbIdint, String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_funddisb = new JSONArray();
+ 			JSONArray rs_funddisbtranche = new JSONArray();
+ 			JSONArray rs_fundrepaymt = new JSONArray();
+-			rs_funddisb = objFundService.getfunddisb(pgId, funddisbIdint, langCode, 4);
+-			rs_funddisbtranche = objFundService.getfunddisb(pgId, funddisbIdint, langCode, 5);
+-			rs_fundrepaymt = objFundService.getfunddisb(pgId, funddisbIdint, langCode, 6);
+-			combined.add(toList(rs_funddisb));
+-			combined.add(toList(rs_funddisbtranche));
+-			combined.add(toList(rs_fundrepaymt));
++			rs_funddisb = objFundService.getFunddisb(pgId, funddisbIdint, langCode, 4);
++			rs_funddisbtranche = objFundService.getFunddisb(pgId, funddisbIdint, langCode, 5);
++			rs_fundrepaymt = objFundService.getFunddisb(pgId, funddisbIdint, langCode, 6);
++			combined.add(Objcomm.toList(rs_funddisb));
++			combined.add(Objcomm.toList(rs_funddisbtranche));
++			combined.add(Objcomm.toList(rs_fundrepaymt));
+ 
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+@@ -284,12 +249,13 @@
+ 	public ArrayList<List<Object>> getFurepymtlist(String langCode, String userCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_list = new JSONArray();
+ 			
+ 			rs_list = objFundService.getFurepymtlist(langCode, userCode,3);
+ 
+-			combined.add(toList(rs_list));
++			combined.add(Objcomm.toList(rs_list));
+ 
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+@@ -300,16 +266,17 @@
+ 
+ 	
+ }
+-	@PostMapping("/getfundrepymtdtl")
++	@PostMapping("/getFundrepymtdtl")
+ 	public ArrayList<List<Object>> getfundrepymtdtl(String pgId, String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_fundrepymt = new JSONArray();
+ 			
+-			rs_fundrepymt = objFundService.getfundrepymtdtl(pgId, langCode,3);
++			rs_fundrepymt = objFundService.getFundrepymtdtl(pgId, langCode,3);
+ 
+-			combined.add(toList(rs_fundrepymt));
++			combined.add(Objcomm.toList(rs_fundrepymt));
+ 
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_DAO.java
+index fb94fa4..e2c3e94 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_DAO.java
+@@ -81,7 +81,7 @@
+ 		}
+ 	}
+ 
+-	public ResultSet iudfunddisbt(int gId, String pgId, String funddisbId, int trancheNo, BigDecimal trancheAmount,
++	public ResultSet iudFunddisbt(int gId, String pgId, String funddisbId, int trancheNo, BigDecimal trancheAmount,
+ 			Date trancheDate, String trancheStatusCode, Date receivedDate, String receivedRefNo, String syncStatusCode,
+ 			String langCode, String userCode, String modeFlag, String succMsg)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+@@ -116,7 +116,7 @@
+ 		}
+ 	}
+ 
+-	public ResultSet iudfunddisb(int gId, String pgId, String fundreqId, String funddisbId, String loanAccNo,
++	public ResultSet iudFunddis(int gId, String pgId, String fundreqId, String funddisbId, String loanAccNo,
+ 			String routingInstCode, String sourceInstCode, String funddisbTypeCode, Date sanctionedDate,
+ 			BigDecimal sanctionedAmount, int interestRate, int repymtTenure, String repymtFreqCode,
+ 			String collateralTypeCode, BigDecimal collateralAmount, String statusCode, String langCode, String userCode,
+@@ -231,7 +231,7 @@
+ 		}
+ 	}
+ 
+-	public ResultSet iudfundrepymt(int gId, String pgId, String loanAccNo, Date pymtDate, String payModeCode,
++	public ResultSet iudFundrepymt(int gId, String pgId, String loanAccNo, Date pymtDate, String payModeCode,
+ 			BigDecimal paidAmount, String pymtRefNo, BigDecimal principalAmount, BigDecimal interestAmount,
+ 			BigDecimal otherAmount, String pymtRemarks, String statusCode, String langCode, String userCode,
+ 			String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+@@ -268,7 +268,7 @@
+ 		}
+ 	}
+ 
+-	public ResultSet getfunddisb(String pgId, String funddisbIdint, String langCode, int refCursor) 
++	public ResultSet getFunddisb(String pgId, String funddisbIdint, String langCode, int refCursor) 
+ 				throws ClassNotFoundException, java.sql.SQLException {
+ 			Connection conn = CommonConfiguration.getInstance().connect();
+ 			java.sql.CallableStatement callableStatement = conn
+@@ -317,7 +317,7 @@
+ 			}
+ 		}
+ 
+-	public ResultSet getfundrepymtdtl(String pgId, String langCode, int refCursor)
++	public ResultSet getFundrepymtdtl(String pgId, String langCode, int refCursor)
+ 				throws ClassNotFoundException, java.sql.SQLException {
+ 			Connection conn = CommonConfiguration.getInstance().connect();
+ 			java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_fetch_fundrepymtdtl(?,?,?)}");
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_Interface.java
+index 02541ed..a2daf92 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/DAO/FundRequisition_Interface.java
+@@ -15,10 +15,10 @@
+ 			BigDecimal totfundreqAmount, String reviewertypeCode, int clfblockID, String reviewerCode, String fundreqRemark,
+ 			 Date lastactionDate, String statusCode, String langCode, String userCode, String modeFlag, String rowTimestamp,
+ 			String succMsg)throws ClassNotFoundException, java.sql.SQLException;
+-	public ResultSet iudfunddisbt(int gId, String pgId, String funddisbId, int trancheNo, BigDecimal trancheAmount,
++	public ResultSet iudFunddisbt(int gId, String pgId, String funddisbId, int trancheNo, BigDecimal trancheAmount,
+ 			Date trancheDate, String trancheStatusCode,  Date receivedDate, String receivedRefNo, String syncStatusCode,
+ 			String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException ;
+-	public ResultSet iudfunddisb(int gId, String pgId, String fundreqId, String funddisbId, String loanAccNo,
++	public ResultSet iudFunddis(int gId, String pgId, String fundreqId, String funddisbId, String loanAccNo,
+ 			String routingInstCode, String sourceInstCode, String funddisbTypeCode, Date sanctionedDate,
+ 			BigDecimal sanctionedAmount, int interestRate, int repymtTenure, String repymtFreqCode,
+ 			String collateralTypeCode, BigDecimal collateralAmount, String statusCode, String langCode, String userCode,
+@@ -27,16 +27,16 @@
+ 	public ResultSet getFundreqlist(String langCode, int refCursor)throws ClassNotFoundException, java.sql.SQLException;
+ 	public ResultSet getFddistlist(String langCode, int refCursor)
+ 			throws ClassNotFoundException, java.sql.SQLException ;
+-	public ResultSet iudfundrepymt(int gId, String pgId, String loanAccNo, Date pymtDate, String payModeCode,
++	public ResultSet iudFundrepymt(int gId, String pgId, String loanAccNo, Date pymtDate, String payModeCode,
+ 			BigDecimal paidAmount, String pymtRefNo,  BigDecimal principalAmount,
+ 			BigDecimal interestAmount, BigDecimal otherAmount, String pymtRemarks, String statusCode, String langCode,
+ 			String userCode, String modeFlag, 
+ 			String succMsg)throws ClassNotFoundException, java.sql.SQLException;
+-	public ResultSet getfunddisb(String pgId, String funddisbIdint, String langCode, int refCursor) 
++	public ResultSet getFunddisb(String pgId, String funddisbIdint, String langCode, int refCursor) 
+ 			throws ClassNotFoundException, java.sql.SQLException ;
+ 	public ResultSet getFurepymtlist(String langCode, String userCode, int refCursor)
+ 			throws ClassNotFoundException, java.sql.SQLException;
+-	public ResultSet getfundrepymtdtl(String pgId, String langCode, int refCursor)
++	public ResultSet getFundrepymtdtl(String pgId, String langCode, int refCursor)
+ 			throws ClassNotFoundException, java.sql.SQLException ;
+ 
+ }
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Service/FundRequisition_Service.java b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Service/FundRequisition_Service.java
+index d10b143..3ea41e7 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Service/FundRequisition_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/FundRequisition/Service/FundRequisition_Service.java
+@@ -78,13 +78,13 @@
+ 		
+ 	}
+ 
+-	public JSONArray iudfunddisbt(int gId, String pgId, String funddisbId, int trancheNo, BigDecimal trancheAmount,
++	public JSONArray iudFunddisbt(int gId, String pgId, String funddisbId, int trancheNo, BigDecimal trancheAmount,
+ 			Date trancheDate, String trancheStatusCode, Date receivedDate, String receivedRefNo, String syncStatusCode,
+ 			String langCode, String userCode,String modeFlag, 
+ 			String succMsg)  throws ClassNotFoundException, java.sql.SQLException{
+ 				try {
+ 
+-					ResultSet fundReq_rs = objfunddao.iudfunddisbt(gId, pgId, funddisbId, trancheNo,
++					ResultSet fundReq_rs = objfunddao.iudFunddisbt(gId, pgId, funddisbId, trancheNo,
+ 							trancheAmount, trancheDate, trancheStatusCode, receivedDate, receivedRefNo,syncStatusCode, langCode, userCode, modeFlag, succMsg);
+ 
+ 					JSONArray json = new JSONArray();
+@@ -110,14 +110,14 @@
+ 
+ }
+ 
+-	public JSONArray iudfunddisb(int gId, String pgId, String fundreqId, String funddisbId, String loanAccNo,
++	public JSONArray iudFunddis(int gId, String pgId, String fundreqId, String funddisbId, String loanAccNo,
+ 			String routingInstCode, String sourceInstCode, String funddisbTypeCode, Date sanctionedDate,
+ 			BigDecimal sanctionedAmount, int interestRate, int repymtTenure, String repymtFreqCode,
+ 			String collateralTypeCode, BigDecimal collateralAmount, String statusCode, String langCode, String userCode,
+ 			String modeFlag, String rowTimestamp, String succMsg)throws ClassNotFoundException, java.sql.SQLException{
+ 					try {
+ 
+-						ResultSet fundReq_rs = objfunddao.iudfunddisb(gId, pgId, fundreqId, funddisbId,loanAccNo,routingInstCode,sourceInstCode,
++						ResultSet fundReq_rs = objfunddao.iudFunddis(gId, pgId, fundreqId, funddisbId,loanAccNo,routingInstCode,sourceInstCode,
+ 								funddisbTypeCode, sanctionedDate, sanctionedAmount, interestRate, repymtTenure,repymtFreqCode, collateralTypeCode, collateralAmount, statusCode, langCode,userCode,modeFlag,rowTimestamp,succMsg);
+ 
+ 						JSONArray json = new JSONArray();
+@@ -221,13 +221,13 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudfundrepymt(int gId, String pgId, String loanAccNo, Date pymtDate, String payModeCode,
++	public JSONArray iudFundrepymt(int gId, String pgId, String loanAccNo, Date pymtDate, String payModeCode,
+ 			BigDecimal paidAmount, String pymtRefNo,  BigDecimal principalAmount,
+ 			BigDecimal interestAmount, BigDecimal otherAmount, String pymtRemarks, String statusCode, String langCode,
+ 			String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException{
+ 						try {
+ 
+-							ResultSet fundReq_rs = objfunddao.iudfundrepymt( gId,  pgId,  loanAccNo,  pymtDate,  payModeCode,
++							ResultSet fundReq_rs = objfunddao.iudFundrepymt( gId,  pgId,  loanAccNo,  pymtDate,  payModeCode,
+ 									 paidAmount,  pymtRefNo,   principalAmount,
+ 									 interestAmount,  otherAmount,  pymtRemarks,  statusCode,  langCode,
+ 									 userCode,  modeFlag,  succMsg);
+@@ -253,9 +253,9 @@
+ 						}
+ 	}
+ 
+-	public JSONArray getfunddisb(String pgId, String funddisbIdint, String langCode, int refCursor)throws ClassNotFoundException, java.sql.SQLException {
++	public JSONArray getFunddisb(String pgId, String funddisbIdint, String langCode, int refCursor)throws ClassNotFoundException, java.sql.SQLException {
+ 
+-			ResultSet pgfddist_rs = objfunddao.getfunddisb(pgId, funddisbIdint, langCode, refCursor);
++			ResultSet pgfddist_rs = objfunddao.getFunddisb(pgId, funddisbIdint, langCode, refCursor);
+ 
+ 			JSONArray json = new JSONArray();
+ 
+@@ -296,10 +296,10 @@
+ 			return json;
+ 		}
+ 
+-	public JSONArray getfundrepymtdtl(String pgId, String langCode, int refCursor) 
++	public JSONArray getFundrepymtdtl(String pgId, String langCode, int refCursor) 
+ 				throws ClassNotFoundException, java.sql.SQLException {
+ 
+-			ResultSet pgfddistlist_rs = objfunddao.getfundrepymtdtl(pgId, langCode, refCursor);
++			ResultSet pgfddistlist_rs = objfunddao.getFundrepymtdtl(pgId, langCode, refCursor);
+ 
+ 			JSONArray json = new JSONArray();
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/IncExpense/Controller/IncExpense_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/IncExpense/Controller/IncExpense_Controller.java
+index 77a0706..c70c2a0 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/IncExpense/Controller/IncExpense_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/IncExpense/Controller/IncExpense_Controller.java
+@@ -27,6 +27,7 @@
+ import com.fasterxml.jackson.annotation.JsonProperty;
+ import com.google.gson.Gson;
+ 
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.FundRequisition.Controller.FundRequisition_Controller;
+ import NRLM.Web.Api.FundRequisition.Model.Fund_Common_Model;
+ import NRLM.Web.Api.FundRequisition.Service.FundRequisition_Service;
+@@ -42,56 +43,14 @@
+ 	IncExpense_Service Objincser;
+ 	IncExp_Common_Model Objinccom;
+ 	String json="";
+-	@NonNull
+-	@Column(columnDefinition = "TEXT")
+-	@JsonIgnore
+-	private JSONObject jsonData;
+-	public IncExpense_Controller(IncExpense_Service Objincser) {
+-		this.Objincser = Objincser;
++	Common_Function Objcomm;
+ 	
+-	}
+-	@JsonProperty("jsonData")
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
+ 	@PostMapping("/iudIncomeexpense")
+ 	public String iudIncomeexpense(@RequestParam int incomeexpenseGid, String pgId, String accheadTypeCode,
+ 			String accheadCode, Date tranDate, BigDecimal drAmount, BigDecimal crAmount, String tranNarration,
+ 			String tranRefNo, String tranRemark, String statusCode, String langCode, String userCode, String modeFlag,
+ 			String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+-			// objCommonmodel = new PG_Common_Model();
+ 			Objinccom = new IncExp_Common_Model();
+ 			Objinccom._data = Objincser.iudIncomeexpense(incomeexpenseGid, pgId, accheadTypeCode,
+ 					accheadCode, tranDate, drAmount, crAmount, tranNarration, tranRefNo, tranRemark, statusCode,
+@@ -120,12 +79,13 @@
+ 	public ArrayList<List<Object>> getIncexplist(String langCode, String userCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_list = new JSONArray();
+ 
+ 			rs_list = Objincser.getIncexplist(langCode, userCode, 3);
+ 
+-			combined.add(toList(rs_list));
++			combined.add(Objcomm.toList(rs_list));
+ 
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+@@ -138,12 +98,13 @@
+ 	public ArrayList<List<Object>> getIncexpdtl(String pgId, String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_iedtl = new JSONArray();
+ 
+ 			rs_iedtl = Objincser.getIncexpdtl(pgId, langCode, 3);
+ 
+-			combined.add(toList(rs_iedtl));
++			combined.add(Objcomm.toList(rs_iedtl));
+ 
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Controller/ProduceAggregation_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Controller/ProduceAggregation_Controller.java
+index 657b53c..21cca3c 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Controller/ProduceAggregation_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Controller/ProduceAggregation_Controller.java
+@@ -27,6 +27,7 @@
+ import com.fasterxml.jackson.annotation.JsonProperty;
+ import com.google.gson.Gson;
+ 
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.FundRequisition.Controller.FundRequisition_Controller;
+ import NRLM.Web.Api.FundRequisition.Model.Fund_Common_Model;
+ import NRLM.Web.Api.FundRequisition.Service.FundRequisition_Service;
+@@ -42,55 +43,14 @@
+ 	@Autowired
+ 	ProduceAggregation_Service objproagserv;
+ 	Pro_Common_Model Objprocom;
++	
+ 	String json="";
+-	@NonNull
+-	@Column(columnDefinition = "TEXT")
+-	@JsonIgnore
+-	private JSONObject jsonData;
+-	public ProduceAggregation_Controller(ProduceAggregation_Service objproagserv) {
+-		this.objproagserv = objproagserv;
+-
+-	}
+-	@JsonProperty("jsonData")
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
+-	@PostMapping("/iudpgmemledger")
++	Common_Function Objcomm;
++	@PostMapping("/iudPgmemledger")
+ 	public  String iudpgmemledger(@RequestParam int gId,String pgId,String pgmemberId,String accheadCode,Date tranDate,BigDecimal drAmount,BigDecimal crAmount,String  tranNarration,String tranRefNo,String tranRemark ,String statusCode ,String langCode,String userCode,String modeFlag,String succMsg) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			Objprocom = new Pro_Common_Model();
+-			Objprocom._data = objproagserv.iudpgmemledger(gId,pgId,pgmemberId,accheadCode,tranDate,drAmount,crAmount,tranNarration,tranRefNo,tranRemark,statusCode,langCode,userCode,modeFlag,succMsg);
++			Objprocom._data = objproagserv.iudPgmemledger(gId,pgId,pgmemberId,accheadCode,tranDate,drAmount,crAmount,tranNarration,tranRefNo,tranRemark,statusCode,langCode,userCode,modeFlag,succMsg);
+ 			json = new Gson().toJson(Objprocom._data);
+ 
+ 			return json;
+@@ -108,11 +68,11 @@
+ 			return json;
+ 		}
+ 	}
+-	@PostMapping("/iudpgmempay")
++	@PostMapping("/iudPgmempay")
+ 	public  String iudpgmempay(@RequestParam int gId,String pgId,String pgmemberId,Date paidDate,Date periodFrom,Date periodTo,String  paymodeCode,BigDecimal  paidAmount,String pymtRefNo,String pymtRemark ,String statusCode ,String langCode,String userCode,String modeFlag,String succMsg) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			Objprocom = new Pro_Common_Model();
+-			Objprocom._data = objproagserv.iudpgmempay(gId,pgId,pgmemberId,paidDate,periodFrom,periodTo,paymodeCode,paidAmount,pymtRefNo,pymtRemark,statusCode,langCode,userCode,modeFlag,succMsg);
++			Objprocom._data = objproagserv.iudPgmempay(gId,pgId,pgmemberId,paidDate,periodFrom,periodTo,paymodeCode,paidAmount,pymtRefNo,pymtRemark,statusCode,langCode,userCode,modeFlag,succMsg);
+ 			json = new Gson().toJson(Objprocom._data);
+ 
+ 			return json;
+@@ -134,13 +94,14 @@
+ 	public ArrayList<List<Object>> getPgmemleddtl( @RequestParam String pgId ,String pgmemberId,String langCode)
+ 			throws NoSuchElementException, java.sql.SQLException, ClassNotFoundException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_memberledger = new JSONArray(); 
+ 			JSONArray rs_memberpayment=new JSONArray();
+ 			rs_memberledger = objproagserv.getPgmemleddtl( pgId,pgmemberId, langCode,4);
+ 			rs_memberpayment = objproagserv.getPgmemleddtl( pgId,pgmemberId, langCode,5);
+-			combined.add(toList(rs_memberledger));
+-			combined.add(toList(rs_memberpayment));
++			combined.add(Objcomm.toList(rs_memberledger));
++			combined.add(Objcomm.toList(rs_memberpayment));
+ 			
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+@@ -154,10 +115,11 @@
+ public ArrayList<List<Object>> getPgmemledsummlst( @RequestParam String langCode, String userCode)
+ 		throws NoSuchElementException, java.sql.SQLException, ClassNotFoundException {
+ 	try {
++		Objcomm = new Common_Function();
+ 		ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 		JSONArray _result_memberledgersumm = new JSONArray(); 
+ 		_result_memberledgersumm = objproagserv.getPgmemledsummlst( langCode,userCode, 3);
+-		combined.add(toList(_result_memberledgersumm));
++		combined.add(Objcomm.toList(_result_memberledgersumm));
+ 		
+ 		json = new Gson().toJson(combined);
+ 		return combined;
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_DAO.java
+index 02db579..6765c03 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_DAO.java
+@@ -12,7 +12,7 @@
+ 
+ public class ProduceAggregation_DAO implements ProduceAggregation_Interface {
+ 
+-	public ResultSet iudpgmemledger(int gId, String pgId, String pgmemberId, String accheadCode, Date tranDate,
++	public ResultSet iudPgmemledger(int gId, String pgId, String pgmemberId, String accheadCode, Date tranDate,
+ 			BigDecimal drAmount, BigDecimal crAmount, String tranNarration, String tranRefNo, String tranRemark,
+ 			String statusCode, String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException {
+ 				Connection conn = CommonConfiguration.getInstance().connect();	
+@@ -52,7 +52,7 @@
+ 			    }
+ 	}
+ 
+-	public ResultSet iudpgmempay(int gId, String pgId, String pgmemberId, Date paidDate, Date periodFrom, Date periodTo,
++	public ResultSet iudPgmempay(int gId, String pgId, String pgmemberId, Date paidDate, Date periodFrom, Date periodTo,
+ 			String paymodeCode, BigDecimal paidAmount, String pymtRefNo, String pymtRemark, String statusCode,
+ 			String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException {
+ 					Connection conn = CommonConfiguration.getInstance().connect();	
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_Interface.java
+index 03de9ec..714bc79 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/DAO/ProduceAggregation_Interface.java
+@@ -7,10 +7,10 @@
+ 
+ public interface ProduceAggregation_Interface {
+ 	
+-	public ResultSet iudpgmemledger(int gId, String pgId, String pgmemberId, String accheadCode, Date tranDate,
++	public ResultSet iudPgmemledger(int gId, String pgId, String pgmemberId, String accheadCode, Date tranDate,
+ 			BigDecimal drAmount, BigDecimal crAmount, String tranNarration, String tranRefNo, String tranRemark,
+ 			String statusCode, String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException ;
+-	public ResultSet iudpgmempay(int gId, String pgId, String pgmemberId, Date paidDate, Date periodFrom, Date periodTo,
++	public ResultSet iudPgmempay(int gId, String pgId, String pgmemberId, Date paidDate, Date periodFrom, Date periodTo,
+ 			String paymodeCode, BigDecimal paidAmount, String pymtRefNo, String pymtRemark, String statusCode,
+ 			String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException;
+ 	public ResultSet getPgmemleddtl(String pgId, String pgmemberId, String langCode, int refCursor) throws NoSuchElementException, java.sql.SQLException ;
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Service/ProduceAggregation_Service.java b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Service/ProduceAggregation_Service.java
+index fcb0e63..dfc713b 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Service/ProduceAggregation_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProduceAggregation/Service/ProduceAggregation_Service.java
+@@ -17,11 +17,11 @@
+ public class ProduceAggregation_Service {
+ 	ProduceAggregation_DAO Objproaggdao = new ProduceAggregation_DAO() ;
+ 
+-	public JSONArray iudpgmemledger(int gId, String pgId, String pgmemberId, String accheadCode, Date tranDate,
++	public JSONArray iudPgmemledger(int gId, String pgId, String pgmemberId, String accheadCode, Date tranDate,
+ 			BigDecimal drAmount, BigDecimal crAmount, String tranNarration, String tranRefNo, String tranRemark,
+ 			String statusCode, String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException  {
+ 				try {
+-				ResultSet proagg_rs = Objproaggdao.iudpgmemledger(gId,pgId,pgmemberId,accheadCode,tranDate,drAmount,crAmount,tranNarration,tranRefNo,tranRemark,statusCode,langCode,userCode,modeFlag,succMsg);
++				ResultSet proagg_rs = Objproaggdao.iudPgmemledger(gId,pgId,pgmemberId,accheadCode,tranDate,drAmount,crAmount,tranNarration,tranRefNo,tranRemark,statusCode,langCode,userCode,modeFlag,succMsg);
+ 				JSONArray json = new JSONArray();
+ 
+ 				ResultSetMetaData rsmd = ((ResultSet) proagg_rs).getMetaData();
+@@ -46,11 +46,11 @@
+ 				}
+ 	}
+ 
+-	public JSONArray iudpgmempay(int gId, String pgId, String pgmemberId, Date paidDate, Date periodFrom, Date periodTo,
++	public JSONArray iudPgmempay(int gId, String pgId, String pgmemberId, Date paidDate, Date periodFrom, Date periodTo,
+ 			String paymodeCode, BigDecimal paidAmount, String pymtRefNo, String pymtRemark, String statusCode,
+ 			String langCode, String userCode, String modeFlag, String succMsg)throws ClassNotFoundException, java.sql.SQLException  {
+ 					try {
+-					ResultSet propay_rs = Objproaggdao.iudpgmempay(gId,pgId,pgmemberId,paidDate,periodFrom,periodTo,paymodeCode,paidAmount,pymtRefNo,pymtRemark,statusCode,langCode,userCode,modeFlag,succMsg);
++					ResultSet propay_rs = Objproaggdao.iudPgmempay(gId,pgId,pgmemberId,paidDate,periodFrom,periodTo,paymodeCode,paidAmount,pymtRefNo,pymtRemark,statusCode,langCode,userCode,modeFlag,succMsg);
+ 					JSONArray json = new JSONArray();
+ 
+ 					ResultSetMetaData rsmd = ((ResultSet) propay_rs).getMetaData();
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/BusinessPlan_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/BusinessPlan_Controller.java
+index 461541c..d380d86 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/BusinessPlan_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/BusinessPlan_Controller.java
+@@ -27,6 +27,8 @@
+ import com.fasterxml.jackson.annotation.JsonIgnore;
+ import com.fasterxml.jackson.annotation.JsonProperty;
+ import com.google.gson.Gson;
++
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.ProducerGroup.Model.BusinessPlan_Model;
+ import NRLM.Web.Api.ProducerGroup.Model.BusinessPlanpro_Model;
+ import NRLM.Web.Api.ProducerGroup.Model.OnBoarding_Model;
+@@ -45,63 +47,13 @@
+ 	 private BusinessPlan_Service business_service;
+ 	PG_Common_Model objCmnModel;
+ 	String json="";
+-	@NonNull
+-	@Column(columnDefinition = "TEXT")
+-	@JsonIgnore
+-	private JSONObject jsonData;
++	Common_Function Objcomm;
+ 	
+-	public BusinessPlan_Controller(BusinessPlan_Service business_service) {
+-		this.business_service = business_service;
+-
+-	}
+-
+-
+-	@JsonProperty("jsonData")
+-	public Map<String, Object> getAsJsonString() throws IOException, JSONException {
+-		return toMap(jsonData);
+-	}
+-
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
+-
+-	@PostMapping("/iudbusplan")
+-	public String iudbusplan(@RequestBody BusinessPlan_Model objbusplan) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/iudBusplan")
++	public String iudBusplan(@RequestBody BusinessPlan_Model objbusplan) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			objCmnModel = new PG_Common_Model();
+-			objCmnModel._data = business_service.iudbusplan(objbusplan);
++			objCmnModel._data = business_service.iudBusplan(objbusplan);
+ 			json = new Gson().toJson(objCmnModel._data);
+ 
+ 			return json;
+@@ -174,11 +126,11 @@
+ 		
+ 		}
+ 	}
+-	@PostMapping("/iudbusplanpro")
+-	public String iudbusplanpro(@RequestBody BusinessPlanpro_Model objbppro) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/iudBusplanpro")
++	public String iudBusplanpro(@RequestBody BusinessPlanpro_Model objbppro) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			objCmnModel = new PG_Common_Model();
+-			objCmnModel._data = business_service.iudbusplanpro(objbppro);
++			objCmnModel._data = business_service.iudBusplanpro(objbppro);
+ 			json = new Gson().toJson(objCmnModel._data);
+ 
+ 			return json;
+@@ -228,34 +180,36 @@
+ 		}
+ 
+ 	}
+-	@PostMapping("/GetBpslist")
+-	public ArrayList<List<Object>> getBPList(@RequestParam String langCode)
++	@PostMapping("/getBpslist")
++	public ArrayList<List<Object>> getBpslist(@RequestParam String langCode)
+ 			throws NoSuchElementException, java.sql.SQLException, ClassNotFoundException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray result_pg = new JSONArray();
+-			result_pg = business_service.getBPList(langCode, 2);
+-			combined.add(toList(result_pg));
++			result_pg = business_service.getBpslist(langCode, 2);
++			combined.add(Objcomm.toList(result_pg));
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+ 			logger.error(e.getMessage());
+ 			throw new NoSuchElementException(e.getMessage());
+ 		}
+ 	}
+-	@PostMapping("/GetBpsdtl")
+-	public ArrayList<List<Object>> getBPSdtl(@RequestParam String bpsId, @RequestParam String langCode)
++	@PostMapping("/getBpsdtl")
++	public ArrayList<List<Object>> getBpsdtl(@RequestParam String bpsId, @RequestParam String langCode)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray result_bussplan = new JSONArray();
+ 			JSONArray result_comm = new JSONArray();
+ 			JSONArray result_attachment = new JSONArray();
+-			result_bussplan = business_service.getBPSdtl(bpsId, langCode, 3);
+-			result_comm = business_service.getBPSdtl(bpsId, langCode, 4);
+-			result_attachment = business_service.getBPSdtl(bpsId, langCode, 5);
+-		    combined.add(toList(result_bussplan));
+-			combined.add(toList(result_comm));
+-			combined.add(toList(result_attachment));
++			result_bussplan = business_service.getBpsdtl(bpsId, langCode, 3);
++			result_comm = business_service.getBpsdtl(bpsId, langCode, 4);
++			result_attachment = business_service.getBpsdtl(bpsId, langCode, 5);
++		    combined.add(Objcomm.toList(result_bussplan));
++			combined.add(Objcomm.toList(result_comm));
++			combined.add(Objcomm.toList(result_attachment));
+ 			
+ 			return combined;
+ 
+@@ -264,16 +218,17 @@
+ 		}
+ 	}
+ 	//panchayatlist
+-	@PostMapping("/Getpanchayatlist")
++	@PostMapping("/getpanchayatlist")
+ 
+-	public ArrayList<List<Object>> getPanjayatList(@RequestParam int blkId, String langCode)
++	public ArrayList<List<Object>> getpanchayatlist(@RequestParam int blkId, String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_panlist = new JSONArray();
+-			rs_panlist = business_service.getPanjayatList(blkId, langCode, 3);
++			rs_panlist = business_service.getpanchayatlist(blkId, langCode, 3);
+ 
+-			combined.add(toList(rs_panlist));
++			combined.add(Objcomm.toList(rs_panlist));
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+ 			logger.error(e.getMessage());
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/MemberProfile_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/MemberProfile_Controller.java
+index a5a6d32..cbbf253 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/MemberProfile_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/MemberProfile_Controller.java
+@@ -1,5 +1,6 @@
+ package NRLM.Web.Api.ProducerGroup.Controller;
+ 
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.ProducerGroup.Service.MemberProfile_Service;
+ import org.json.JSONArray;
+ import org.json.JSONException;
+@@ -20,48 +21,15 @@
+ 	@Autowired
+ 	MemberProfile_Service memberprofile_service;
+ 
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
+-	@PostMapping("/GetPGMemList")
+-	public ArrayList<List<Object>> GetPGMemList(@RequestParam String pgId, @RequestParam String langCode,String screenCode) throws java.sql.SQLException, ClassNotFoundException {
++	Common_Function Objcomm;
++	@PostMapping("/getPgmemList")
++	public ArrayList<List<Object>> getPgmemList(@RequestParam String pgId, @RequestParam String langCode,String screenCode) throws java.sql.SQLException, ClassNotFoundException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_pgmemlist = new JSONArray(); 
+-			rs_pgmemlist = memberprofile_service.GetPGMemList(pgId, langCode, 3);
+-			combined.add(toList(rs_pgmemlist));
++			rs_pgmemlist = memberprofile_service.getPgmemList(pgId, langCode, 3);
++			combined.add(Objcomm.toList(rs_pgmemlist));
+ 			return combined;
+ 
+ 		} catch (NoSuchElementException e) {
+@@ -70,10 +38,11 @@
+ 		}
+ 	}
+ 
+-	@PostMapping("/GetPGMemberprodtl")
+-	public ArrayList<List<Object>> GetPGMemberprodtl(@RequestParam String pgId, @RequestParam String pgmemberId,
++	@PostMapping("/GetPgmemberprodtl")
++	public ArrayList<List<Object>> GetPgmemberprodtl(@RequestParam String pgId, @RequestParam String pgmemberId,
+ 			@RequestParam String langCode) throws NoSuchElementException, java.sql.SQLException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_memprof = new JSONArray(); 
+ 			JSONArray rs_address = new JSONArray();
+@@ -84,23 +53,23 @@
+ 			JSONArray rs_assets = new JSONArray();
+ 			JSONArray rs_membership = new JSONArray();
+ 
+-			rs_memprof = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode, 4);
+-			rs_address = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode, 5);
+-			rs_bank = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode,6);
+-			rs_land = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode, 7);
+-			rs_crop = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode,8);
+-			rs_livestock = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode, 9);
+-			rs_assets = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode,10);
+-			rs_membership = memberprofile_service.GetPGMemberprodtl(pgId, pgmemberId, langCode, 11);
++			rs_memprof = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode, 4);
++			rs_address = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode, 5);
++			rs_bank = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode,6);
++			rs_land = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode, 7);
++			rs_crop = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode,8);
++			rs_livestock = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode, 9);
++			rs_assets = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode,10);
++			rs_membership = memberprofile_service.GetPgmemberprodtl(pgId, pgmemberId, langCode, 11);
+ 
+-			combined.add(toList(rs_memprof)); /// 3)single
+-			combined.add(toList(rs_address));
+-			combined.add(toList(rs_bank));
+-			combined.add(toList(rs_land));
+-			combined.add(toList(rs_crop));
+-			combined.add(toList(rs_livestock));
+-			combined.add(toList(rs_assets));
+-			combined.add(toList(rs_membership));
++			combined.add(Objcomm.toList(rs_memprof)); /// 3)single
++			combined.add(Objcomm.toList(rs_address));
++			combined.add(Objcomm.toList(rs_bank));
++			combined.add(Objcomm.toList(rs_land));
++			combined.add(Objcomm.toList(rs_crop));
++			combined.add(Objcomm.toList(rs_livestock));
++			combined.add(Objcomm.toList(rs_assets));
++			combined.add(Objcomm.toList(rs_membership));
+ 
+ 			return combined;
+ 
+@@ -109,13 +78,14 @@
+ 			throw new NoSuchElementException(e.getMessage());
+ 		}
+ 	}
+-	@PostMapping("/getPGnamelist")
+-	public ArrayList<List<Object>> getPGnamelist(@RequestParam String langCode) throws java.sql.SQLException, ClassNotFoundException {
++	@PostMapping("/getPgnamelist")
++	public ArrayList<List<Object>> getPgnamelist(@RequestParam String langCode) throws java.sql.SQLException, ClassNotFoundException {
+ 		try {
++			Objcomm = new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_pgmemlist = new JSONArray(); 
+-			rs_pgmemlist = memberprofile_service.getPGnamelist(langCode,2);
+-			combined.add(toList(rs_pgmemlist));
++			rs_pgmemlist = memberprofile_service.getPgnamelist(langCode,2);
++			combined.add(Objcomm.toList(rs_pgmemlist));
+ 			return combined;
+ 
+ 		} catch (NoSuchElementException e) {
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/OnBoarding_Controller.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/OnBoarding_Controller.java
+index 79d6a3d..8f61280 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/OnBoarding_Controller.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Controller/OnBoarding_Controller.java
+@@ -13,6 +13,7 @@
+ 
+ import javax.servlet.http.HttpServletRequest;
+ import javax.servlet.http.HttpServletResponse;
++import javax.sql.rowset.serial.SerialException;
+ 
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -36,6 +37,7 @@
+ import NRLM.Web.Api.ProducerGroup.Model.Pgudyogmitra_Model;
+ import NRLM.Web.Api.ProducerGroup.Model.ProducerGroup_Model;
+ import NRLM.Web.Api.ProducerGroup.Model.ProductMapping_Model;
++import NRLM.Web.Api.Common_Function;
+ import NRLM.Web.Api.ProducerGroup.Model.Activity_Model;
+ import NRLM.Web.Api.ProducerGroup.Model.Address_Model;
+ import NRLM.Web.Api.ProducerGroup.Model.Bank_Model;
+@@ -60,6 +62,7 @@
+ import java.nio.file.Path;
+ import java.nio.file.Paths;
+ import java.security.InvalidParameterException;
++import java.sql.Blob;
+ import java.sql.ResultSet;
+ import java.sql.SQLException;
+ 
+@@ -74,66 +77,17 @@
+ 	OnBoarding_Service onboarding_service;
+ 	PG_Common_Model objCmnModel;
+ 	String json = "";
++     Common_Function Objcomm;
+ 
+-	@NonNull
+-	@Column(columnDefinition = "TEXT")
+-	@JsonIgnore
+-	private JSONObject jsonData;
+-	public OnBoarding_Controller(OnBoarding_Service onboarding_service) {
+-		this.onboarding_service = onboarding_service;
+-
+-	}
+-
+-
+-	@JsonProperty("jsonData")
+-	public Map<String, Object> getAsJsonString() throws IOException, JSONException {
+-		return toMap(jsonData);
+-	}
+-
+-	public Map<String, Object> toMap(JSONObject object) throws JSONException {
+-		Map<String, Object> map = new HashMap<String, Object>();
+-
+-		Iterator<String> keysItr = object.keys();
+-		while (keysItr.hasNext()) {
+-			String key = keysItr.next();
+-			Object value = object.get(key);
+-
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			map.put(key, value);
+-		}
+-		return map;
+-	}
+-
+-	public List<Object> toList(JSONArray array) throws JSONException {
+-		List<Object> list = new ArrayList<Object>();
+-		for (int i = 0; i < array.length(); i++) {
+-			Object value = array.get(i);
+-			if (value instanceof JSONArray) {
+-				value = toList((JSONArray) value);
+-			}
+-
+-			else if (value instanceof JSONObject) {
+-				value = toMap((JSONObject) value);
+-			}
+-			list.add(value);
+-		}
+-		return list;
+-	}
+-
+-	@PostMapping("/GetPglist")
+-	public ArrayList<List<Object>> GetPglist( @RequestParam String langCode,String screenCode)
++	@PostMapping("/getPglist")
++	public ArrayList<List<Object>> getPglist( @RequestParam String langCode,String screenCode)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray result_pg = new JSONArray(); 
+-			result_pg = onboarding_service.GetPglist( langCode,screenCode, 2);
+-			combined.add(toList(result_pg));
++			result_pg = onboarding_service.getPglist( langCode,screenCode, 2);
++			combined.add(Objcomm.toList(result_pg));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+@@ -142,10 +96,11 @@
+ 		}
+ 	}
+ 
+-	@PostMapping("/GetPgdtl")
+-	public ArrayList<List<Object>> GetPgdtl(@RequestParam String pgId, String langCode)
++	@PostMapping("/getPgdtl")
++	public ArrayList<List<Object>> getPgdtl(@RequestParam String pgId, String langCode)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_profile = new JSONArray();
+ 			JSONArray rs_address = new JSONArray();
+@@ -161,33 +116,33 @@
+ 			JSONArray rs_fundsupp = new JSONArray();
+ 			JSONArray rs_attach = new JSONArray();
+ 
+-			rs_profile = onboarding_service.GetPgdtl(pgId, langCode, 3); 
+-			rs_address = onboarding_service.GetPgdtl(pgId, langCode, 4);
+-			rs_panchayat=onboarding_service.GetPgdtl(pgId, langCode, 5);
+-			rs_collpoint=onboarding_service.GetPgdtl(pgId, langCode, 6);
+-			rs_bank = onboarding_service.GetPgdtl(pgId, langCode, 7);
+-			rs_udyog_mitra = onboarding_service.GetPgdtl(pgId, langCode, 8);
+-			rs_product = onboarding_service.GetPgdtl(pgId, langCode, 9);
+-			rs_office_bearers = onboarding_service.GetPgdtl(pgId, langCode, 10);
+-			rs_activities = onboarding_service.GetPgdtl(pgId, langCode, 11);
+-			rs_clf = onboarding_service.GetPgdtl(pgId, langCode, 12);
+-			rs_finsumm = onboarding_service.GetPgdtl(pgId, langCode, 13);
+-			rs_fundsupp = onboarding_service.GetPgdtl(pgId, langCode, 14);
+-			rs_attach = onboarding_service.GetPgdtl(pgId, langCode, 15);
++			rs_profile = onboarding_service.getPgdtl(pgId, langCode, 3); 
++			rs_address = onboarding_service.getPgdtl(pgId, langCode, 4);
++			rs_panchayat=onboarding_service.getPgdtl(pgId, langCode, 5);
++			rs_collpoint=onboarding_service.getPgdtl(pgId, langCode, 6);
++			rs_bank = onboarding_service.getPgdtl(pgId, langCode, 7);
++			rs_udyog_mitra = onboarding_service.getPgdtl(pgId, langCode, 8);
++			rs_product = onboarding_service.getPgdtl(pgId, langCode, 9);
++			rs_office_bearers = onboarding_service.getPgdtl(pgId, langCode, 10);
++			rs_activities = onboarding_service.getPgdtl(pgId, langCode, 11);
++			rs_clf = onboarding_service.getPgdtl(pgId, langCode, 12);
++			rs_finsumm = onboarding_service.getPgdtl(pgId, langCode, 13);
++			rs_fundsupp = onboarding_service.getPgdtl(pgId, langCode, 14);
++			rs_attach = onboarding_service.getPgdtl(pgId, langCode, 15);
+ 
+-			combined.add(toList(rs_profile)); 
+-			combined.add(toList(rs_address));
+-			combined.add(toList(rs_panchayat));
+-			combined.add(toList(rs_collpoint));
+-			combined.add(toList(rs_bank));
+-			combined.add(toList(rs_udyog_mitra));
+-			combined.add(toList(rs_product));
+-			combined.add(toList(rs_office_bearers));
+-			combined.add(toList(rs_activities));
+-			combined.add(toList(rs_clf));
+-			combined.add(toList(rs_finsumm));
+-			combined.add(toList(rs_fundsupp));
+-			combined.add(toList(rs_attach));
++			combined.add(Objcomm.toList(rs_profile)); 
++			combined.add(Objcomm.toList(rs_address));
++			combined.add(Objcomm.toList(rs_panchayat));
++			combined.add(Objcomm.toList(rs_collpoint));
++			combined.add(Objcomm.toList(rs_bank));
++			combined.add(Objcomm.toList(rs_udyog_mitra));
++			combined.add(Objcomm.toList(rs_product));
++			combined.add(Objcomm.toList(rs_office_bearers));
++			combined.add(Objcomm.toList(rs_activities));
++			combined.add(Objcomm.toList(rs_clf));
++			combined.add(Objcomm.toList(rs_finsumm));
++			combined.add(Objcomm.toList(rs_fundsupp));
++			combined.add(Objcomm.toList(rs_attach));
+ 
+ 			return combined;
+ 
+@@ -198,12 +153,12 @@
+ 	}
+ //pgudyogmitra
+ 	
+-	@PostMapping("/iudPGUdyogmitra")
++	@PostMapping("/iudPgudyogmitra")
+ 	public String iudPGUdyogmitra(@RequestBody Pgudyogmitra_Model objpgud) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			objCmnModel = new PG_Common_Model();
+ 			Scanner in = new Scanner(System.in);
+-			objCmnModel._data = onboarding_service.iudPGUdyogmitra(objpgud);
++			objCmnModel._data = onboarding_service.iudPgudyogmitra(objpgud);
+ 			String input = in.next();
+ 			json = new Gson().toJson(objCmnModel._data);
+ 
+@@ -224,12 +179,12 @@
+ 		}
+ 	}
+ 	//Officebearers
+-	@PostMapping("/iudPGOfficebearers")
++	@PostMapping("/iudPgofficebearers")
+ 	public String iudPGOfficebearers(@RequestBody OfficeBearers_Model objpgofcbeares ) throws ClassNotFoundException,java.sql.SQLException{
+ 		
+ 			try {
+ 				objCmnModel = new PG_Common_Model();
+-				objCmnModel._data = onboarding_service.iudPGOfficebearers(objpgofcbeares);
++				objCmnModel._data = onboarding_service.iudPgofficebearers(objpgofcbeares);
+ 				json = new Gson().toJson(objCmnModel._data);
+ 
+ 				return json;
+@@ -250,13 +205,13 @@
+ 	}
+ 	//productMapping
+ 	
+-	@PostMapping("/iudPGProductmapping")
+-	public  String iudPGProductmapping(@RequestBody ProductMapping_Model objpgpromap ) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/iudPgproductmapping")
++	public  String iudPgproductmapping(@RequestBody ProductMapping_Model objpgpromap ) throws ClassNotFoundException,java.sql.SQLException{
+ 		
+ 		
+ 			try {
+ 				objCmnModel = new PG_Common_Model();
+-				objCmnModel._data = onboarding_service.iudPGProductmapping(objpgpromap);
++				objCmnModel._data = onboarding_service.iudPgproductmapping(objpgpromap);
+ 				json = new Gson().toJson(objCmnModel._data);
+ 
+ 				return json;
+@@ -277,12 +232,12 @@
+ 	}
+ 	
+ 	//Clf
+-	@PostMapping("/iudPGClf")
+-	public  String iudPGClf(@RequestBody Clf_Model objpgclf ) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/iudPgclf")
++	public  String iudPgclf(@RequestBody Clf_Model objpgclf ) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			
+ 			objCmnModel = new PG_Common_Model();
+-			objCmnModel._data = onboarding_service.iudPGClf(objpgclf);
++			objCmnModel._data = onboarding_service.iudPgclf(objpgclf);
+ 			json = new Gson().toJson(objCmnModel._data);
+ 
+ 			return json;
+@@ -302,12 +257,12 @@
+ 		}
+ 	}
+ 	//financesum
+-	@PostMapping("/iudPGFinancesumm")
+-	public String iudPGFinancesumm(@RequestBody Financessum_Model objfunsum ) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/iudPgfinancesumm")
++	public String iudPgfinancesumm(@RequestBody Financessum_Model objfunsum ) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			
+ 			objCmnModel = new PG_Common_Model();
+-			objCmnModel._data = onboarding_service.iudPGFinancesumm(objfunsum);
++			objCmnModel._data = onboarding_service.iudPgfinancesumm(objfunsum);
+ 			json = new Gson().toJson(objCmnModel._data);
+ 
+ 			return json;
+@@ -328,12 +283,12 @@
+ 		}
+ 	}
+ 	//fundsupport
+-	@PostMapping("/iudPGFundsupport")
++	@PostMapping("/iudPgfundsupport")
+ 	public  String iudPGFundsupport(@RequestBody FundSupport_Model objfundsup ) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			
+ 			objCmnModel = new PG_Common_Model();
+-			objCmnModel._data = onboarding_service.iudPGFundsupport(objfundsup);
++			objCmnModel._data = onboarding_service.iudPgfundsupport(objfundsup);
+ 			json = new Gson().toJson(objCmnModel._data );
+ 
+ 			return json;
+@@ -353,12 +308,12 @@
+ 	}
+ 	}
+ 	//bank
+-	@PostMapping("/iudPGBank")
+-	public  String iudPGBank(@RequestBody Bank_Model objbank ) throws ClassNotFoundException,java.sql.SQLException{
++	@PostMapping("/iudPgbank")
++	public  String iudPgbank(@RequestBody Bank_Model objbank ) throws ClassNotFoundException,java.sql.SQLException{
+ 		try {
+ 			
+ 			objCmnModel = new PG_Common_Model();
+-			objCmnModel._data = onboarding_service.iudPGBank(objbank);
++			objCmnModel._data = onboarding_service.iudPgbank(objbank);
+ 			json = new Gson().toJson(objCmnModel._data);
+ 
+ 			return json;
+@@ -379,13 +334,13 @@
+ 	}
+ 	//activity
+ 	
+-	@PostMapping("/iudPGActivity")
++	@PostMapping("/iudPgactivity")
+ 	public  String iudPGActivity(@RequestBody Activity_Model objactivity ) throws ClassNotFoundException,java.sql.SQLException{
+ 	
+ 		try {
+ 			
+ 			objCmnModel = new PG_Common_Model();
+-			objCmnModel._data = onboarding_service.iudPGActivity(objactivity);
++			objCmnModel._data = onboarding_service.iudPgactivity(objactivity);
+ 			json = new Gson().toJson(objCmnModel._data);
+ 
+ 			return json;
+@@ -406,12 +361,11 @@
+ 	}
+ 
+ 	//address
+-@PostMapping("/iudPGAddress")
++@PostMapping("/iudPgaddress")
+ public   String iudPGAddress(@RequestBody Address_Model objaddre) throws ClassNotFoundException,java.sql.SQLException{
+-		logger.info("Before try");
+ 	try {
+ 		objCmnModel = new PG_Common_Model();
+-		objCmnModel._data = onboarding_service.iudPGAddress(objaddre);
++		objCmnModel._data = onboarding_service.iudPgaddress(objaddre);
+ 		json = new Gson().toJson(objCmnModel._data);
+ 
+ 		return json;
+@@ -433,15 +387,14 @@
+ 
+ //attachment
+ 
+-@PostMapping("/iudPGAttachment")
++@PostMapping("/iudPgattachment")
+ public String  iudPGAttachment(@RequestParam MultipartFile file, int gid, String pgID, String docType,
+ 		String docSubType, String filePath, String fileName, String remarks, String langCode, String userCode,
+ 		String modeFlag, String succMsg, OnBoarding_Service OnBo_s)
+ 		throws ClassNotFoundException, java.sql.SQLException {
+-	logger.info("filesaved");
+ 	try {
+ 		objCmnModel = new PG_Common_Model();
+-		objCmnModel._data = onboarding_service.iudPGAttachment(file, gid, pgID, docType, docSubType,
++		objCmnModel._data = onboarding_service.iudPgattachment(file, gid, pgID, docType, docSubType,
+ 				filePath, fileName, remarks, langCode, userCode, modeFlag, succMsg, OnBo_s);
+ 		json = new Gson().toJson(objCmnModel._data);
+ 		return json;
+@@ -510,12 +463,12 @@
+ 	   }
+ 
+ 
+-@PostMapping("/iudPGAttachmentdelete")
++@PostMapping("/iudPgattachmentdelete")
+ public String iudPGAttachmentdelete(@RequestParam int gid, String pgID,String docType,String docSubType,String filePath,String fileName, String modeflag,String langCode)throws ClassNotFoundException, java.sql.SQLException
+ {
+ 	try {
+ 		objCmnModel = new PG_Common_Model();
+-        objCmnModel._data = onboarding_service.iudPGAttachmentdelete(gid,pgID,docType,docSubType,filePath,fileName,modeflag,langCode);
++        objCmnModel._data = onboarding_service.iudPgattachmentdelete(gid,pgID,docType,docSubType,filePath,fileName,modeflag,langCode);
+ 		json = new Gson().toJson(objCmnModel._data);
+ 		return json;
+ 	
+@@ -534,11 +487,11 @@
+ }
+ //producergroup
+ 
+-@PostMapping("/iudPGProgrpdtl")
++@PostMapping("/iudPgprogrpdtl")
+ public String iudPGProgrpdtl(@RequestBody ProducerGroup_Model objprogrp ) throws ClassNotFoundException,java.sql.SQLException{
+ 	try {
+ 		objCmnModel = new PG_Common_Model();
+-		objCmnModel._data = onboarding_service.iudPGProgrpdtl(objprogrp);
++		objCmnModel._data = onboarding_service.iudPgprogrpdtl(objprogrp);
+ 		
+ 		json = new Gson().toJson(objCmnModel._data);
+ 
+@@ -565,7 +518,6 @@
+ 		String collpointllName, String latitudeCode, String longitudeCode, String langCode, String userCode,
+ 		String modeFlag, String succMsg) throws ClassNotFoundException, java.sql.SQLException {
+ 	try {
+-		// objCommonmodel = new PG_Common_Model();
+ 		objCmnModel = new PG_Common_Model();
+ 		objCmnModel._data = onboarding_service.iudPgcollpoint(collpointGid, pgId, collpointNo,
+ 				collpointName, collpointllName, latitudeCode, longitudeCode, langCode, userCode, modeFlag, succMsg);
+@@ -593,10 +545,11 @@
+ 	@PostMapping("/getStatelist")
+ 	public ArrayList<List<Object>> getStatelist() throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray result_pg = new JSONArray();
+ 			result_pg = onboarding_service.getStatelist(1);
+-			combined.add(toList(result_pg));
++			combined.add(Objcomm.toList(result_pg));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+@@ -608,10 +561,11 @@
+ 	public ArrayList<List<Object>> getDistrictlist(@RequestParam int StateId)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_district = new JSONArray();
+ 			rs_district = onboarding_service.getDistrictlist(StateId, 2);
+-			combined.add(toList(rs_district));
++			combined.add(Objcomm.toList(rs_district));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+@@ -623,10 +577,11 @@
+ 	public ArrayList<List<Object>> getBlocklist(@RequestParam int distId)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_block = new JSONArray();
+ 			rs_block = onboarding_service.getBlocklist(distId, 2);
+-			combined.add(toList(rs_block));
++			combined.add(Objcomm.toList(rs_block));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+@@ -638,10 +593,11 @@
+ 	public ArrayList<List<Object>> getPanchayatlist(@RequestParam int blkId)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_panchayat = new JSONArray();
+ 			rs_panchayat = onboarding_service.getPanchayatlist(blkId, 2);
+-			combined.add(toList(rs_panchayat));
++			combined.add(Objcomm.toList(rs_panchayat));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+@@ -652,10 +608,11 @@
+ 	@PostMapping("/getVillagelist")
+ 	public ArrayList<List<Object>> getVillagelist(int blkId) throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
++			Objcomm =new Common_Function();
+ 			ArrayList<List<Object>> combined = new ArrayList<List<Object>>();
+ 			JSONArray rs_village = new JSONArray();
+ 			rs_village = onboarding_service.getVillagelist(blkId, 2);
+-			combined.add(toList(rs_village));
++			combined.add(Objcomm.toList(rs_village));
+ 			json = new Gson().toJson(combined);
+ 			return combined;
+ 		} catch (NoSuchElementException e) {
+@@ -665,7 +622,6 @@
+ 	}
+ 	@RequestMapping("/download")
+ 	public void downloadPDFResource(HttpServletRequest request, HttpServletResponse response, String fileName) {
+-logger.info("before calling");
+ 	//String dataDirectory = request.getServletContext().getRealPath("D:/NRLM/uploads");
+ logger.info("Before file Path:",Paths.get("Uploads", fileName));
+ 	Path file = Paths.get("Uploads", fileName);
+@@ -674,7 +630,6 @@
+ 	logger.info("file:",file);
+ 	if (Files.exists(file)) {
+ 	String app = "application/";
+-logger.info("after calling");
+ 	response.setContentType(app);
+ 	response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+ 	try {
+@@ -687,7 +642,30 @@
+ 	}
+ 	}
+ 
++	@RequestMapping("/downloads")
++	private Blob readFileToBytes(String filePath) throws IOException, SerialException, SQLException, ClassNotFoundException {
++try {
++	    File file = new File(filePath);
++	    byte[] bytes = new byte[(int) file.length()];
+ 
++	    // funny, if can use Java 7, please uses Files.readAllBytes(path)
++	    try(FileInputStream fis = new FileInputStream(file)){
++	        fis.read(bytes);
++	    }
++	   
++	    Blob blob = new javax.sql.rowset.serial.SerialBlob(bytes);
++	    return blob;
++	
++	   
++	}
++catch(SQLException ex) {
++	logger.error(ex.getMessage());
++	throw ex;
++}
++catch(IOException ex) {
++	throw ex;
++}
++	}
+ }
+ 
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_DAO.java
+index 84b763e..fa4f63b 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_DAO.java
+@@ -16,7 +16,7 @@
+ 
+ public class BusinessPlan_DAO implements BusinessPlan_Interface{
+ 
+-	public ResultSet iudbusplan(BusinessPlan_Model objbusplan) throws ClassNotFoundException,java.sql.SQLException{
++	public ResultSet iudBusplan(BusinessPlan_Model objbusplan) throws ClassNotFoundException,java.sql.SQLException{
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -112,7 +112,6 @@
+ 				Connection conn = CommonConfiguration.getInstance().connect();
+ 
+ 				conn.setAutoCommit(false);
+-				//BusinessPlan_Service busplan_serv = new BusinessPlan_Service();
+ 		try {
+ 			
+ 				PreparedStatement preparedStatement = conn.prepareStatement("call pr_iud_bussplanattachment(?,?,?,?,?,?,?,?,?,?,?,?)");
+@@ -147,7 +146,7 @@
+ 				
+ 			}
+ 
+-			public ResultSet iudbusplanpro(BusinessPlanpro_Model objbppro) throws ClassNotFoundException,java.sql.SQLException{
++			public ResultSet iudBusplanpro(BusinessPlanpro_Model objbppro) throws ClassNotFoundException,java.sql.SQLException{
+ 				Connection conn = CommonConfiguration.getInstance().connect();	
+ 				conn.setAutoCommit(false);
+ 				try {
+@@ -244,7 +243,7 @@
+ 					throw ex;
+ 				}
+ 			}
+-			public ResultSet getBPList(String langCode, int refCursor) throws ClassNotFoundException,java.sql.SQLException{
++			public ResultSet getBpslist(String langCode, int refCursor) throws ClassNotFoundException,java.sql.SQLException{
+ 				Connection conn = CommonConfiguration.getInstance().connect();
+ 				try {
+ 					java.sql.CallableStatement callableStatement = conn
+@@ -265,7 +264,7 @@
+ 				}
+ 			}
+ 
+-			public ResultSet getBPSdtl(String bpsId, String langCode, int refCursor)
++			public ResultSet getBpsdtl(String bpsId, String langCode, int refCursor)
+ 					throws NoSuchElementException, java.sql.SQLException {
+ 				Connection conn = CommonConfiguration.getInstance().connect();
+ 				try {
+@@ -289,7 +288,7 @@
+ 
+ 			}
+ 
+-			public ResultSet getPanjayatList(int blkId, String langCode, int refcurser)
++			public ResultSet getpanchayatlist(int blkId, String langCode, int refcurser)
+ 					throws ClassNotFoundException, java.sql.SQLException {
+ 				
+ 				
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_Interface.java
+index de2a9f8..1b1dd8f 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/BusinessPlan_Interface.java
+@@ -8,16 +8,18 @@
+ import NRLM.Web.Api.ProducerGroup.Model.BusinessPlanpro_Model;
+ 
+ public interface BusinessPlan_Interface {
+-	public ResultSet iudbusplan(BusinessPlan_Model objbusplan) throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudBusplan(BusinessPlan_Model objbusplan) throws ClassNotFoundException,java.sql.SQLException;
+ 	public ResultSet iudBPAttachmentdelete(int gid, String pgID, String bussplanId, String docTypeCode,
+ 			String docSubtypeCode, String filePath, String fileName, String remarks, String langCode, String userCode,
+ 			String modeflag, String succMsg)throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudbusplanpro(BusinessPlanpro_Model objbppro) throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudBusplanpro(BusinessPlanpro_Model objbppro) throws ClassNotFoundException,java.sql.SQLException;
+ 	public ResultSet iudPgpanchmap(int pgpanchayatmappingGid, String pgId, int panchayatId, int stateId,
+ 			int districtId, int blockId, String langCode, String userCode, String modeFlag, String succMsg)
+ 			throws ClassNotFoundException, SQLException;
+-	public ResultSet getBPList(String langCode, int refCursor) throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet getBPSdtl(String bpsId, String langCode, int refCursor)
++	public ResultSet getBpslist(String langCode, int refCursor) throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet getBpsdtl(String bpsId, String langCode, int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException;
++	public ResultSet getpanchayatlist(int blkId, String langCode, int refcurser)
++			throws ClassNotFoundException, java.sql.SQLException;
+ 
+ }
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_DAO.java
+index 108e751..7c07fa3 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_DAO.java
+@@ -9,7 +9,7 @@
+ import NRLM.Web.Api.CommonConfiguration;
+ 
+ public class MemberProfile_DAO implements MemberProfile_Interface  {
+-	public ResultSet GetPGMemList(String pgId, String langCode,int refCursor) throws ClassNotFoundException, SQLException {
++	public ResultSet getPgmemList(String pgId, String langCode,int refCursor) throws ClassNotFoundException, SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_pgmemberlist(?,?,?)}");
+ 		conn.setAutoCommit(false);
+@@ -23,7 +23,7 @@
+ 		conn.close();
+ 		return rs;
+ }
+-	public ResultSet GetPGMemberprodtl(String pgId, String pgmemberId, String langCode,int refCursor)
++	public ResultSet GetPgmemberprodtl(String pgId, String pgmemberId, String langCode,int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		CallableStatement callableStatement = conn
+@@ -50,7 +50,7 @@
+ 		return rs;
+ 
+ 	}
+-	public ResultSet getPGnamelist(String langCode, int refCursor)throws ClassNotFoundException, SQLException {
++	public ResultSet getPgnamelist(String langCode, int refCursor)throws ClassNotFoundException, SQLException {
+ 			Connection conn = CommonConfiguration.getInstance().connect();
+ 			java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_pgnamelist(?,?)}");
+ 			conn.setAutoCommit(false);
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_Interface.java
+index 45dcda9..18b5f00 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/MemberProfile_Interface.java
+@@ -6,9 +6,9 @@
+ 
+ public interface MemberProfile_Interface {
+ 	
+-	public ResultSet GetPGMemList(String pgId, String langCode,int refCursor) throws ClassNotFoundException, SQLException;
+-	public ResultSet GetPGMemberprodtl(String pgId, String pgmemberId, String langCode,int refCursor)
++	public ResultSet getPgmemList(String pgId, String langCode,int refCursor) throws ClassNotFoundException, SQLException;
++	public ResultSet GetPgmemberprodtl(String pgId, String pgmemberId, String langCode,int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException;
+-	public ResultSet getPGnamelist(String langCode, int refCursor)throws ClassNotFoundException, SQLException;
++	public ResultSet getPgnamelist(String langCode, int refCursor)throws ClassNotFoundException, SQLException;
+ }
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_DAO.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_DAO.java
+index 26ed4a3..d4216cc 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_DAO.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_DAO.java
+@@ -24,7 +24,7 @@
+ public class OnBoarding_DAO  implements OnBoarding_Interface{
+ 	OnBoarding_Service onboarding_service;
+ 
+-	public ResultSet GetPglist(String langCode,int refCursor,String screenCode) throws NoSuchElementException, java.sql.SQLException {
++	public ResultSet getPglist(String langCode,int refCursor,String screenCode) throws NoSuchElementException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_pglist(?,?)}");
+ 		conn.setAutoCommit(false);
+@@ -40,7 +40,7 @@
+ 
+ 	}
+ 
+-	public ResultSet GetPgdtl(String pgId,String langCode,int refCursor)throws NoSuchElementException, java.sql.SQLException {
++	public ResultSet getPgdtl(String pgId,String langCode,int refCursor)throws NoSuchElementException, java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 		java.sql.CallableStatement callableStatement = conn.prepareCall("{call pr_get_pgdtl(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)}");
+ 		conn.setAutoCommit(false);
+@@ -76,7 +76,7 @@
+ 	}
+ 
+ 	
+-	public ResultSet iudPGUdyogmitra(Pgudyogmitra_Model objpgud) throws ClassNotFoundException,java.sql.SQLException{
++	public ResultSet iudPgudyogmitra(Pgudyogmitra_Model objpgud) throws ClassNotFoundException,java.sql.SQLException{
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		try {
+ 	    PreparedStatement preparedStatement = conn.prepareStatement("call  pr_iud_pgudyogmitra(?,?,?,?,?,?,?,?,?,?,?)");
+@@ -111,7 +111,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGOfficebearers(OfficeBearers_Model objpgofcbeares)throws ClassNotFoundException,java.sql.SQLException {
++	public ResultSet iudPgofficebearers(OfficeBearers_Model objpgofcbeares)throws ClassNotFoundException,java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -147,7 +147,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGProductmapping(ProductMapping_Model objpgpromap)throws ClassNotFoundException,java.sql.SQLException {
++	public ResultSet iudPgproductmapping(ProductMapping_Model objpgpromap)throws ClassNotFoundException,java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -185,7 +185,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGClf(Clf_Model objpgclf)throws ClassNotFoundException,java.sql.SQLException {
++	public ResultSet iudPgclf(Clf_Model objpgclf)throws ClassNotFoundException,java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -221,7 +221,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGFinancesumm(Financessum_Model objfinsum)throws ClassNotFoundException,java.sql.SQLException  {
++	public ResultSet iudPgfinancesumm(Financessum_Model objfinsum)throws ClassNotFoundException,java.sql.SQLException  {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -257,7 +257,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGFundsupport(FundSupport_Model objfundsup)throws ClassNotFoundException,java.sql.SQLException  {
++	public ResultSet iudPgfundsupport(FundSupport_Model objfundsup)throws ClassNotFoundException,java.sql.SQLException  {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -294,7 +294,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGBank(Bank_Model objbank)throws ClassNotFoundException,java.sql.SQLException   {
++	public ResultSet iudPgbank(Bank_Model objbank)throws ClassNotFoundException,java.sql.SQLException   {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -330,7 +330,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGActivity(Activity_Model objactivity)throws ClassNotFoundException,java.sql.SQLException {
++	public ResultSet iudPgactivity(Activity_Model objactivity)throws ClassNotFoundException,java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -363,7 +363,7 @@
+ 	    }
+ 	}
+ 
+-	public ResultSet iudPGAddress(Address_Model objaddre)throws ClassNotFoundException,java.sql.SQLException {
++	public ResultSet iudPgaddress(Address_Model objaddre)throws ClassNotFoundException,java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+ 		try {
+@@ -406,7 +406,7 @@
+ 	
+ 	
+ 	
+-	public ResultSet iudPGAttachment(MultipartFile file, int gid, String pgID, String docType, String docSubType,
++	public ResultSet iudPgattachment(MultipartFile file, int gid, String pgID, String docType, String docSubType,
+ 			String filePath, String fileName, String remarks, String langCode, String userCode, String modeFlag,
+ 			String succMsg, OnBoarding_Service OnBo_s) throws ClassNotFoundException, SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+@@ -448,7 +448,7 @@
+ 	}
+ 	
+ 
+-	public ResultSet iudPGProgrpdtl(ProducerGroup_Model objprogrp)throws ClassNotFoundException, SQLException {
++	public ResultSet iudPgprogrpdtl(ProducerGroup_Model objprogrp)throws ClassNotFoundException, SQLException {
+ 		
+ 		Connection conn = CommonConfiguration.getInstance().connect();	
+ 		conn.setAutoCommit(false);
+@@ -497,7 +497,7 @@
+ 
+ }
+ 
+-	public ResultSet iudPGAttachmentdelete(int gid, String pgID,String docType,String docSubType,String filePath,String fileName, String modeflag,String langCode)throws ClassNotFoundException,java.sql.SQLException {
++	public ResultSet iudPgattachmentdelete(int gid, String pgID,String docType,String docSubType,String filePath,String fileName, String modeflag,String langCode)throws ClassNotFoundException,java.sql.SQLException {
+ 		Connection conn = CommonConfiguration.getInstance().connect();
+ 
+ 		conn.setAutoCommit(false);
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_Interface.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_Interface.java
+index 06c03b7..cd8b56a 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_Interface.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/DAO/OnBoarding_Interface.java
+@@ -25,22 +25,22 @@
+ 
+ 
+ public interface OnBoarding_Interface {
+-	public ResultSet GetPglist(String langCode,int refCursor,String screenCode) throws NoSuchElementException, java.sql.SQLException ;
+-	public ResultSet GetPgdtl(String pgId,String langCode,int refCursor)throws NoSuchElementException, java.sql.SQLException  ;
+-	public ResultSet iudPGUdyogmitra(Pgudyogmitra_Model objpgud) throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudPGOfficebearers(OfficeBearers_Model objpgofcbeares)throws ClassNotFoundException,java.sql.SQLException ;
+-	public ResultSet iudPGProductmapping(ProductMapping_Model objpgpromap)throws ClassNotFoundException,java.sql.SQLException ;
+-	public ResultSet iudPGClf(Clf_Model objpgclf)throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudPGFinancesumm(Financessum_Model objfinsum)throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudPGFundsupport(FundSupport_Model objfundsup)throws ClassNotFoundException,java.sql.SQLException ;
+-	public ResultSet iudPGBank(Bank_Model objbank)throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudPGActivity(Activity_Model objactivity)throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudPGAddress(Address_Model objaddre)throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudPGAttachment(MultipartFile file, int gid, String pgID, String docType, String docSubType,
++	public ResultSet getPglist(String langCode,int refCursor,String screenCode) throws NoSuchElementException, java.sql.SQLException ;
++	public ResultSet getPgdtl(String pgId,String langCode,int refCursor)throws NoSuchElementException, java.sql.SQLException  ;
++	public ResultSet iudPgudyogmitra(Pgudyogmitra_Model objpgud) throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudPgofficebearers(OfficeBearers_Model objpgofcbeares)throws ClassNotFoundException,java.sql.SQLException ;
++	public ResultSet iudPgproductmapping(ProductMapping_Model objpgpromap)throws ClassNotFoundException,java.sql.SQLException ;
++	public ResultSet iudPgclf(Clf_Model objpgclf)throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudPgfinancesumm(Financessum_Model objfinsum)throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudPgfundsupport(FundSupport_Model objfundsup)throws ClassNotFoundException,java.sql.SQLException ;
++	public ResultSet iudPgbank(Bank_Model objbank)throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudPgactivity(Activity_Model objactivity)throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudPgaddress(Address_Model objaddre)throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudPgattachment(MultipartFile file, int gid, String pgID, String docType, String docSubType,
+ 			String filePath, String fileName, String remarks, String langCode, String userCode, String modeFlag,
+ 			String succMsg, OnBoarding_Service OnBo_s) throws ClassNotFoundException, SQLException;
+-	public ResultSet iudPGAttachmentdelete(int gid, String pgID,String docType,String docSubType, String filePath,String fileName,String modeflag,String langCode)throws ClassNotFoundException,java.sql.SQLException;
+-	public ResultSet iudPGProgrpdtl(ProducerGroup_Model objprogrp)throws ClassNotFoundException, SQLException ;
++	public ResultSet iudPgattachmentdelete(int gid, String pgID,String docType,String docSubType, String filePath,String fileName,String modeflag,String langCode)throws ClassNotFoundException,java.sql.SQLException;
++	public ResultSet iudPgprogrpdtl(ProducerGroup_Model objprogrp)throws ClassNotFoundException, SQLException ;
+ 	public ResultSet iudPgcollpoint(int collpointGid, String pgId, int collpointNo, String collpointName,
+ 			String collpointllName, String latitudeCode, String longitudeCode, String langCode, String userCode,
+ 			String modeFlag, String succMsg) throws ClassNotFoundException, SQLException;
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/BusinessPlan_Service.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/BusinessPlan_Service.java
+index 1a2853a..af7dce9 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/BusinessPlan_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/BusinessPlan_Service.java
+@@ -38,11 +38,11 @@
+ 		this.uploadDir = uploadDir;
+ 	}
+ 
+-		public JSONArray iudbusplan(BusinessPlan_Model objbusplan)
++		public JSONArray iudBusplan(BusinessPlan_Model objbusplan)
+ 				throws ClassNotFoundException, java.sql.SQLException {
+ 			try {
+ 				List<BusinessPlan_Model> objbusplanlist = new ArrayList<BusinessPlan_Model>();
+-			ResultSet busplan_rs = objbpdao.iudbusplan(objbusplan);
++			ResultSet busplan_rs = objbpdao.iudBusplan(objbusplan);
+ 			JSONArray json = new JSONArray();
+ 
+ 			ResultSetMetaData rsmd = ((ResultSet) busplan_rs).getMetaData();
+@@ -154,11 +154,11 @@
+ 					}
+ 			}
+ 
+-					public JSONArray iudbusplanpro(BusinessPlanpro_Model objbppro)
++					public JSONArray iudBusplanpro(BusinessPlanpro_Model objbppro)
+ 							throws ClassNotFoundException, java.sql.SQLException {
+ 						try {
+ 							List<BusinessPlanpro_Model> objbpprolist = new ArrayList<BusinessPlanpro_Model>();
+-						ResultSet bppro_rs = objbpdao.iudbusplanpro(objbppro);
++						ResultSet bppro_rs = objbpdao.iudBusplanpro(objbppro);
+ 						JSONArray json = new JSONArray();
+ 
+ 						ResultSetMetaData rsmd = ((ResultSet) bppro_rs).getMetaData();
+@@ -212,9 +212,9 @@
+ 					}
+ 
+ 
+-					public JSONArray getBPList(String langCode, int refCursor) throws NoSuchElementException, java.sql.SQLException, ClassNotFoundException {
++					public JSONArray getBpslist(String langCode, int refCursor) throws NoSuchElementException, java.sql.SQLException, ClassNotFoundException {
+ 						try {
+-							ResultSet bspsubmission_rs = objbpdao.getBPList(langCode, refCursor);
++							ResultSet bspsubmission_rs = objbpdao.getBpslist(langCode, refCursor);
+ 
+ 							JSONArray json = new JSONArray();
+ 
+@@ -238,11 +238,11 @@
+ 						}
+ 					}
+ 
+-					public JSONArray getBPSdtl(String bpsId, String langCode, int refCursor)
++					public JSONArray getBpsdtl(String bpsId, String langCode, int refCursor)
+ 							throws NoSuchElementException, java.sql.SQLException {
+ 						try {
+ 
+-							ResultSet bspsubmission_rs = objbpdao.getBPSdtl(bpsId, langCode, refCursor);
++							ResultSet bspsubmission_rs = objbpdao.getBpsdtl(bpsId, langCode, refCursor);
+ 
+ 							JSONArray json = new JSONArray();
+ 
+@@ -266,10 +266,10 @@
+ 
+ 					}
+ 
+-					public JSONArray getPanjayatList(int blkId, String langCode, int refcurser)
++					public JSONArray getpanchayatlist(int blkId, String langCode, int refcurser)
+ 							throws ClassNotFoundException, java.sql.SQLException {
+ 						try {
+-							ResultSet bspsubmission_rs = objbpdao.getPanjayatList(blkId, langCode, refcurser);
++							ResultSet bspsubmission_rs = objbpdao.getpanchayatlist(blkId, langCode, refcurser);
+ 
+ 							JSONArray json = new JSONArray();
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/MemberProfile_Service.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/MemberProfile_Service.java
+index 55d5928..69c44ab 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/MemberProfile_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/MemberProfile_Service.java
+@@ -18,10 +18,10 @@
+ public class MemberProfile_Service {
+ 	MemberProfile_DAO memberprofiledao = new MemberProfile_DAO();
+ 
+-	public JSONArray GetPGMemList(String pgId, String langCode, int refCursor)
++	public JSONArray getPgmemList(String pgId, String langCode, int refCursor)
+ 			throws java.sql.SQLException, ClassNotFoundException {
+ try {
+-		ResultSet pgmemlist_rs = memberprofiledao.GetPGMemList(pgId, langCode, refCursor);
++		ResultSet pgmemlist_rs = memberprofiledao.getPgmemList(pgId, langCode, refCursor);
+ 
+ 		JSONArray json = new JSONArray();
+ 
+@@ -42,10 +42,10 @@
+ 	throw e;
+ }
+ 	}
+-	public JSONArray GetPGMemberprodtl(String pgId, String pgmemberId, String langCode,int refCursor)
++	public JSONArray GetPgmemberprodtl(String pgId, String pgmemberId, String langCode,int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ try {
+-		ResultSet memberprofile_rs = memberprofiledao.GetPGMemberprodtl(pgId, pgmemberId, langCode, refCursor);
++		ResultSet memberprofile_rs = memberprofiledao.GetPgmemberprodtl(pgId, pgmemberId, langCode, refCursor);
+ 
+ 		JSONArray json = new JSONArray();
+ 
+@@ -66,9 +66,9 @@
+ 	throw e;
+ }
+ 	}
+-	public JSONArray getPGnamelist(String langCode, int refCursor)throws java.sql.SQLException, ClassNotFoundException {
++	public JSONArray getPgnamelist(String langCode, int refCursor)throws java.sql.SQLException, ClassNotFoundException {
+ 	try {
+-			ResultSet pgnamelist_rs = memberprofiledao.getPGnamelist(langCode,refCursor);
++			ResultSet pgnamelist_rs = memberprofiledao.getPgnamelist(langCode,refCursor);
+ 
+ 			JSONArray json = new JSONArray();
+ 
+diff --git a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/OnBoarding_Service.java b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/OnBoarding_Service.java
+index 43fd9bf..49a33d4 100644
+--- a/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/OnBoarding_Service.java
++++ b/NRLM/src/main/java/NRLM/Web/Api/ProducerGroup/Service/OnBoarding_Service.java
+@@ -54,10 +54,10 @@
+ 		this.uploadDir = uploadDir;
+ 	}
+ 
+-	public JSONArray GetPglist(String langCode, String screenCode, int refCursor)
++	public JSONArray getPglist(String langCode, String screenCode, int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ try {
+-		ResultSet onboarding_rs = objonboardingdao.GetPglist(langCode, refCursor, screenCode);
++		ResultSet onboarding_rs = objonboardingdao.getPglist(langCode, refCursor, screenCode);
+ 
+ 		JSONArray json = new JSONArray();
+ 
+@@ -83,10 +83,10 @@
+ }
+ //code end
+ 
+-	public JSONArray GetPgdtl(String langCode, String pgId, int refCursor)
++	public JSONArray getPgdtl(String langCode, String pgId, int refCursor)
+ 			throws NoSuchElementException, java.sql.SQLException {
+ try {
+-		ResultSet onboarding_rs = objonboardingdao.GetPgdtl(langCode, pgId, refCursor);
++		ResultSet onboarding_rs = objonboardingdao.getPgdtl(langCode, pgId, refCursor);
+ 
+ 		JSONArray json = new JSONArray();
+ 
+@@ -110,11 +110,11 @@
+ }
+ 	}
+ 
+-	public JSONArray iudPGUdyogmitra(Pgudyogmitra_Model objpgud)
++	public JSONArray iudPgudyogmitra(Pgudyogmitra_Model objpgud)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<Pgudyogmitra_Model> objpgudlst = new ArrayList<Pgudyogmitra_Model>();
+-		ResultSet pgud_rs = objonboardingdao.iudPGUdyogmitra(objpgud);
++		ResultSet pgud_rs = objonboardingdao.iudPgudyogmitra(objpgud);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) pgud_rs).getMetaData();
+@@ -138,11 +138,11 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudPGOfficebearers(OfficeBearers_Model objpgofcbeares)
++	public JSONArray iudPgofficebearers(OfficeBearers_Model objpgofcbeares)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<OfficeBearers_Model> objofcbeareslst = new ArrayList<OfficeBearers_Model>();
+-		ResultSet pgofcbeares_rs = objonboardingdao.iudPGOfficebearers(objpgofcbeares);
++		ResultSet pgofcbeares_rs = objonboardingdao.iudPgofficebearers(objpgofcbeares);
+ 		
+ 		JSONArray json = new JSONArray();
+ 
+@@ -167,11 +167,11 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudPGProductmapping(ProductMapping_Model objpgpromap)
++	public JSONArray iudPgproductmapping(ProductMapping_Model objpgpromap)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<ProductMapping_Model> objpromaplst = new ArrayList<ProductMapping_Model>();
+-		ResultSet pgpromap_rs = objonboardingdao.iudPGProductmapping(objpgpromap);
++		ResultSet pgpromap_rs = objonboardingdao.iudPgproductmapping(objpgpromap);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) pgpromap_rs).getMetaData();
+@@ -199,10 +199,10 @@
+ 
+ 	
+ 
+-	public JSONArray iudPGClf(Clf_Model objpgclf) throws ClassNotFoundException, java.sql.SQLException {
++	public JSONArray iudPgclf(Clf_Model objpgclf) throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<Clf_Model> objpgclflst = new ArrayList<Clf_Model>();
+-		ResultSet pgclf_rs = objonboardingdao.iudPGClf(objpgclf);
++		ResultSet pgclf_rs = objonboardingdao.iudPgclf(objpgclf);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) pgclf_rs).getMetaData();
+@@ -227,11 +227,11 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudPGFinancesumm(Financessum_Model objfinsum)
++	public JSONArray iudPgfinancesumm(Financessum_Model objfinsum)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<Financessum_Model> objfinsumlst = new ArrayList<Financessum_Model>();
+-		ResultSet finsum_rs = objonboardingdao.iudPGFinancesumm(objfinsum);
++		ResultSet finsum_rs = objonboardingdao.iudPgfinancesumm(objfinsum);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) finsum_rs).getMetaData();
+@@ -255,12 +255,12 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudPGFundsupport(FundSupport_Model objfundsup)
++	public JSONArray iudPgfundsupport(FundSupport_Model objfundsup)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		
+ 		List<FundSupport_Model> objfundsuplst = new ArrayList<FundSupport_Model>();
+-		ResultSet fundsup_rs = objonboardingdao.iudPGFundsupport(objfundsup);
++		ResultSet fundsup_rs = objonboardingdao.iudPgfundsupport(objfundsup);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) fundsup_rs).getMetaData();
+@@ -285,10 +285,10 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudPGBank(Bank_Model objbank) throws ClassNotFoundException, java.sql.SQLException {
++	public JSONArray iudPgbank(Bank_Model objbank) throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<Bank_Model> objbanklst = new ArrayList<Bank_Model>();
+-		ResultSet bank_rs = objonboardingdao.iudPGBank(objbank);
++		ResultSet bank_rs = objonboardingdao.iudPgbank(objbank);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) bank_rs).getMetaData();
+@@ -313,11 +313,11 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudPGActivity(Activity_Model objactivity)
++	public JSONArray iudPgactivity(Activity_Model objactivity)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<Activity_Model> objactivitylst = new ArrayList<Activity_Model>();
+-		ResultSet activity_rs = objonboardingdao.iudPGActivity(objactivity);
++		ResultSet activity_rs = objonboardingdao.iudPgactivity(objactivity);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) activity_rs).getMetaData();
+@@ -343,11 +343,11 @@
+ 		
+ 	}
+ 
+-	public JSONArray iudPGAddress(Address_Model objaddre)
++	public JSONArray iudPgaddress(Address_Model objaddre)
+ 			throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+ 		List<Address_Model> objaddrelst = new ArrayList<Address_Model>();
+-		ResultSet addre_rs = objonboardingdao.iudPGAddress(objaddre);
++		ResultSet addre_rs = objonboardingdao.iudPgaddress(objaddre);
+ 		JSONArray json = new JSONArray();
+ 
+ 		ResultSetMetaData rsmd = ((ResultSet) addre_rs).getMetaData();
+@@ -372,11 +372,11 @@
+ 		}
+ 	}
+ 
+-	public JSONArray iudPGAttachment(MultipartFile file, int gid, String pgID, String docType, String docSubType,
++	public JSONArray iudPgattachment(MultipartFile file, int gid, String pgID, String docType, String docSubType,
+ 			String filePath, String fileName, String remarks, String langCode, String userCode, String modeFlag,
+ 			String succMsg, OnBoarding_Service OnBo_s) throws ClassNotFoundException, java.sql.SQLException {
+ 		try {
+-			ResultSet attach_rs = objonboardingdao.iudPGAttachment(file, gid, pgID, docType, docSubType, filePath,
++			ResultSet attach_rs = objonboardingdao.iudPgattachment(file, gid, pgID, docType, docSubType, filePath,
+ 					fileName, remarks, langCode, userCode, modeFlag, succMsg, OnBo_s);
+ 			
+ 			JSONArray json = new JSONArray();
+@@ -427,11 +427,11 @@
+ 
+ 		}
+ 
+-		public JSONArray iudPGProgrpdtl(ProducerGroup_Model objprogrp)
++		public JSONArray iudPgprogrpdtl(ProducerGroup_Model objprogrp)
+ 				throws ClassNotFoundException, java.sql.SQLException {
+ 			try {
+ 			List<ProducerGroup_Model> objprogrplst = new ArrayList<ProducerGroup_Model>();
+-			ResultSet progrp_rs = objonboardingdao.iudPGProgrpdtl(objprogrp);
++			ResultSet progrp_rs = objonboardingdao.iudPgprogrpdtl(objprogrp);
+ 			JSONArray json = new JSONArray();
+ 
+ 			ResultSetMetaData rsmd = ((ResultSet) progrp_rs).getMetaData();
+@@ -456,10 +456,10 @@
+ 	}
+ 		
+ 
+-		public JSONArray iudPGAttachmentdelete(int gid, String pgID,String docType,String docSubType,String filePath,String fileName, String modeflag,String langCode)throws ClassNotFoundException,java.sql.SQLException {
++		public JSONArray iudPgattachmentdelete(int gid, String pgID,String docType,String docSubType,String filePath,String fileName, String modeflag,String langCode)throws ClassNotFoundException,java.sql.SQLException {
+ 			try {
+ 				
+-				ResultSet attach_rs = objonboardingdao.iudPGAttachmentdelete( gid, pgID,docType, docSubType,filePath,fileName,modeflag,langCode);
++				ResultSet attach_rs = objonboardingdao.iudPgattachmentdelete( gid, pgID,docType, docSubType,filePath,fileName,modeflag,langCode);
+ 				JSONArray json = new JSONArray();
+ 
+ 				ResultSetMetaData rsmd = ((ResultSet) attach_rs).getMetaData();
+diff --git a/NRLM/src/main/resources/application.properties b/NRLM/src/main/resources/application.properties
+index 72334b0..bd98789 100644
+--- a/NRLM/src/main/resources/application.properties
++++ b/NRLM/src/main/resources/application.properties
+@@ -12,8 +12,10 @@
+ server.servlet.contextPath=/api/v1.0
+ jwt.secret=flexicode
+ jwt.get.token.uri=/api/authenticate
+-nrlm.jwt.token.validity=5
+-nrlm.jwt.enabled=false
++nrlm.jwt.token.validity=10
++nrlm.jwt.enabled=true
++spring.mvc.pathmatch.matching-strategy=ant-path-matcher
++nrlm.file.path=/uploads
+ 
+ 
+ 
